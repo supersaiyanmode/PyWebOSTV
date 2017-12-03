@@ -1,4 +1,5 @@
 import socket
+from future.moves.urllib.parse import urlparse
 
 import requests
 
@@ -28,7 +29,7 @@ def validate_location(location, keyword, timeout=5):
 
 
 # Adapted from Dan Krause (https://gist.github.com/dankrause/6000248)
-def discover(service, keyword=None, retries=2, timeout=5, mx=3):
+def discover(service, keyword=None, hosts=False, retries=1, timeout=5, mx=3):
     group = ('239.255.255.250', 1900)
     locations = set()
     seen = set()
@@ -58,4 +59,8 @@ def discover(service, keyword=None, retries=2, timeout=5, mx=3):
                         locations.add(location)
             except socket.timeout:
                 break
-    return locations
+
+    if hosts:
+        return {urlparse(x).hostname for x in locations}
+    else:
+        return {x for x in locations}

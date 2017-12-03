@@ -5,6 +5,7 @@ from uuid import uuid4
 
 from ws4py.client.threadedclient import WebSocketClient
 
+from pywebostv.discovery import discover
 
 
 SIGNATURE = ("eyJhbGdvcml0aG0iOiJSU0EtU0hBMjU2Iiwia2V5SWQiOiJ0ZXN0LXNpZ25pbm" +
@@ -95,6 +96,12 @@ class WebOSClient(WebSocketClient):
         ws_url = "ws://{}:3000/".format(host)
         super(WebOSClient, self).__init__(ws_url, exclude_headers=["Origin"])
         self.waiters = {}
+
+    @staticmethod
+    def discover():
+        res = discover("urn:schemas-upnp-org:device:MediaRenderer:1",
+                       keyword="LG", hosts=True, retries=3)
+        return [WebOSClient(x) for x in res]
 
     def register(self, store):
         if "client_key" in store:
