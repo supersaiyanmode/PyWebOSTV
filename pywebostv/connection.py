@@ -1,6 +1,7 @@
 import json
 import time
 from queue import Queue, Empty
+from threading import RLock
 from uuid import uuid4
 
 from ws4py.client.threadedclient import WebSocketClient
@@ -96,6 +97,8 @@ class WebOSClient(WebSocketClient):
         ws_url = "ws://{}:3000/".format(host)
         super(WebOSClient, self).__init__(ws_url, exclude_headers=["Origin"])
         self.waiters = {}
+        self.waiter_lock = RLock()
+        self.send_lock = RLock()
 
     @staticmethod
     def discover():
@@ -103,55 +106,64 @@ class WebOSClient(WebSocketClient):
                        keyword="LG", hosts=True, retries=3)
         return [WebOSClient(x) for x in res]
 
-    def register(self, store):
+    def register(self, store, timeout=60):
         if "client_key" in store:
-            REGISTRATION_PAYLOAD["payload"]["client-key"] = store["client_key"]
+            REGISTRATION_PAYLOAD["client-key"] = store["client_key"]
 
-        response = self.send('register', None, REGISTRATION_PAYLOAD, block=True)
-        for r in response:
-            if "payload" in r and r["payload"].get("pairingType") == "PROMPT":
+        queue = self.send('register', None, REGISTRATION_PAYLOAD,
+                          get_queue=True)
+        while True:
+            try:
+                item = queue.get(block=True, timeout=timeout)
+            except Empty:
+                raise Exception("Timeout.")
+
+            if item.get("payload", {}).get("pairingType") == "PROMPT":
                 yield WebOSClient.PROMPTED
-            elif r["type"] == "registered":
-                store["client_key"] = r["payload"]["client-key"]
+            elif item["type"] == "registered":
+                store["client_key"] = item["payload"]["client-key"]
                 yield WebOSClient.REGISTERED
                 break
             else:
                 # TODO: Better exception.
                 raise Exception("Failed to register.")
 
-    def send(self, request_type, uri, payload, unique_id=None, block=False,
-             timeout=60, callback=None):
+    def send(self, request_type, uri, payload, unique_id=None, get_queue=False,
+             callback=None):
         if unique_id is None:
             unique_id = str(uuid4())
 
-        if block:
+        if get_queue:
             wait_queue = Queue()
-            self.waiters[unique_id] = (wait_queue.put, time.time())
-        else:
+            callback = wait_queue.put
+
+        with self.waiter_lock:
             if callback is not None:
                 self.waiters[unique_id] = (callback, time.time())
 
-        obj = {"type": request_type, "id": unique_id, "payload": payload}
+        obj = {"type": request_type, "id": unique_id}
         if uri is not None:
             obj["uri"] = uri
+        if payload is not None:
+            if isinstance(payload, str) or True:
+                obj["payload"] = payload
+            else:
+                obj["payload"] = json.dumps(payload)
 
-        super(WebOSClient, self).send(json.dumps(obj))
+        with self.send_lock:
+            super(WebOSClient, self).send(json.dumps(obj))
 
-        while block:
-            try:
-                yield wait_queue.get(block=True, timeout=timeout)
-                wait_queue.task_done()
-            except Empty:
-                break
+        if get_queue:
+            return wait_queue
 
     def received_message(self, msg):
         obj = json.loads(str(msg))
 
-        self.clear_old_waiters()
-
-        if "id" in obj and obj["id"] in self.waiters:
-            callback, created_time = self.waiters[obj["id"]]
-            callback(obj)
+        with self.waiter_lock:
+            self.clear_old_waiters()
+            if "id" in obj and obj["id"] in self.waiters:
+                callback, created_time = self.waiters[obj["id"]]
+                callback(obj)
 
     def clear_old_waiters(self, delta=60):
         to_clear = []
