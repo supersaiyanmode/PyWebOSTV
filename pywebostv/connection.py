@@ -1,5 +1,6 @@
 import json
 import time
+from collections import Sequence, Mapping, Callable
 from queue import Queue, Empty
 from threading import RLock
 from uuid import uuid4
@@ -89,6 +90,35 @@ REGISTRATION_PAYLOAD = {
 }
 
 
+def arguments(val):
+    def func(payload, *args, **kwargs):
+        if isinstance(val, int):
+            return args[val]
+        elif isinstance(val, str):
+            return kwargs[val]
+        return None
+    return func
+
+
+def process_payload(obj, *args, **kwargs):
+    if isinstance(obj, Sequence):
+        res = []
+        for item in obj:
+            if isinstance(item, Callable):
+                res.append(item(obj, *args, **kwargs))
+            else:
+                res.append(item)
+        return res
+    elif isinstance(obj, Mapping):
+        res = {}
+        for key, value in obj.items():
+            if isinstance(value, Callable):
+                res[key] = value(obj, *args, **kwargs)
+            else:
+                res[key] = value
+        return res
+
+
 class WebOSClient(WebSocketClient):
     PROMPTED = 1
     REGISTERED = 2
@@ -175,3 +205,35 @@ class WebOSClient(WebSocketClient):
 
         for key in to_clear:
             self.waiters.pop(key)
+
+
+class WebOSControlBase(object):
+    COMMANDS = []
+
+    def __init__(self, client):
+        self.client = client
+
+    def request(self, uri, params, callback=None, block=False, timeout=60):
+        if block:
+            queue = self.client.send('request', uri, params, get_queue=True)
+            try:
+                return queue.get(timeout=timeout, block=True)
+            except Empty:
+                raise Exception("Failed.")
+        else:
+            self.client.send('request', uri, params, callback=callback)
+
+    def __getattr__(self, name):
+        if name in self.COMMANDS:
+            return self.exec_command(name, self.COMMANDS[name])
+        raise AttributeError(name)
+
+    def exec_command(self, cmd, cmd_info):
+        def request_func(*args, **kwargs):
+            callback = kwargs.pop('callback', None)
+            block = kwargs.pop('block', False)
+            timeout = kwargs.pop('timeout', 60)
+            params = process_payload(cmd_info.get("payload"), *args, **kwargs)
+            return self.request(cmd_info["uri"], params,
+                                callback=callback, block=block, timeout=timeout)
+        return request_func
