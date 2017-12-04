@@ -240,7 +240,7 @@ class WebOSControlBase(object):
         return request_func
 
 
-class VolumeControl(WebOSControlBase):
+class MediaControl(WebOSControlBase):
     COMMANDS = {
         "volume_up": {"uri": "ssap://audio/volumeUp"},
         "volume_down": {"uri": "ssap://audio/volumeDown"},
@@ -255,17 +255,12 @@ class VolumeControl(WebOSControlBase):
             "args": [bool],
             "payload": {"mute": arguments(0)}
         },
-    }
-
-
-class MediaControl(WebOSControlBase):
-    COMMANDS = {
         "play": {"uri": "ssap://media.controls/play"},
         "pause": {"uri": "ssap://media.controls/pause"},
         "stop": {"uri": "ssap://media.controls/stop"},
         "rewind": {"uri": "ssap://media.controls/rewind"},
         "fast_forward": {"uri": "ssap://media.controls/fastForward"},
-    }
+     }
 
 
 class SystemControl(WebOSControlBase):
