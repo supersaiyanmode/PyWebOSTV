@@ -8,6 +8,7 @@ from uuid import uuid4
 from ws4py.client.threadedclient import WebSocketClient
 
 from pywebostv.discovery import discover
+from pywebostv.model import Application
 
 
 SIGNATURE = ("eyJhbGdvcml0aG0iOiJSU0EtU0hBMjU2Iiwia2V5SWQiOiJ0ZXN0LXNpZ25pbm" +
@@ -237,3 +238,59 @@ class WebOSControlBase(object):
             return self.request(cmd_info["uri"], params,
                                 callback=callback, block=block, timeout=timeout)
         return request_func
+
+
+class VolumeControl(WebOSControlBase):
+    COMMANDS = {
+        "volume_up": {"uri": "ssap://audio/volumeUp"},
+        "volume_down": {"uri": "ssap://audio/volumeDown"},
+        "get_volume": {"uri": "ssap://audio/getVolume"},
+        "set_volume": {
+            "uri": "ssap://audio/setVolume",
+            "args": [int],
+            "payload": {"volume": arguments(0)}
+        },
+        "mute": {
+            "uri": "ssap://audio/setMute",
+            "args": [bool],
+            "payload": {"mute": arguments(0)}
+        },
+    }
+
+
+class MediaControl(WebOSControlBase):
+    COMMANDS = {
+        "play": {"uri": "ssap://media.controls/play"},
+        "pause": {"uri": "ssap://media.controls/pause"},
+        "stop": {"uri": "ssap://media.controls/stop"},
+        "rewind": {"uri": "ssap://media.controls/rewind"},
+        "fast_forward": {"uri": "ssap://media.controls/fastForward"},
+    }
+
+
+class SystemControl(WebOSControlBase):
+    COMMANDS = {
+        "power_off": {"uri": "ssap://system/turnOff"},
+        "info": {
+            "uri": "ssap://com.webos.service.update/getCurrentSWInformation"
+        },
+        "notify": {
+            "uri": "ssap://system.notifications/createToast",
+            "args": [str],
+            "payload": {"message": arguments(0)}
+        }
+    }
+
+
+class ApplicationControl(WebOSControlBase):
+    COMMANDS = {
+    }
+
+    def list_apps(self):
+        res = self.request("ssap://com.webos.applicationManager/listApps",
+                           params=None, block=True)
+        if not res.get("payload", {}).get("returnValue"):
+            raise Exception("Could not list apps.")
+
+        return [Application(self, x) for x in res["payload"]["apps"]]
+
