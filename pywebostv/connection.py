@@ -2,7 +2,7 @@ import json
 import time
 from collections import Sequence, Mapping, Callable
 from queue import Queue, Empty
-from threading import RLock
+from threading import RLock, Event
 from uuid import uuid4
 
 from ws4py.client.threadedclient import WebSocketClient
@@ -292,5 +292,45 @@ class ApplicationControl(WebOSControlBase):
         if not res.get("payload", {}).get("returnValue"):
             raise Exception("Could not list apps.")
 
-        return [Application(self, x) for x in res["payload"]["apps"]]
+        return [Application(x) for x in res["payload"]["apps"]]
 
+    def launch(self, app, content_id=None, params=None, block=True,
+               callback=None, timeout=None):
+        payload = {"id": app["id"]}
+        if content_id is not None:
+            payload["contentId"] = content_id
+        if params is not None:
+            payload["params"] = params
+
+        response_received = Event()
+        launch_data = []
+
+        def save_launch_info(response):
+            launch_info = response["payload"]
+            if launch_info.get("returnValue"):
+                launch_info.pop("returnValue")
+                launch_data.append(launch_info)
+            else:
+                launch_info = None
+
+            if block:
+                response_received.set()
+            if callback:
+                callback(launch_info)
+
+        self.request("ssap://system.launcher/launch", payload, block=False,
+                     callback=save_launch_info)
+
+        if block:
+            response_received.wait(timeout=timeout)
+            if not launch_data:
+                raise Exception("Unable to launch app.")
+            return launch_data[0]
+
+    def close(self, launch_info, block=False, callback=None):
+        sess_id = launch_info.get("sessionId")
+        if not sess_id:
+            raise Exception("Session not found.")
+
+        self.request("ssap://system.launcher/close", launch_info, block=block,
+                     callback=callback)
