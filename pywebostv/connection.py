@@ -91,13 +91,14 @@ REGISTRATION_PAYLOAD = {
     "pairingType": "PROMPT"
 }
 
+ARGS_NONE = ()
 
-def arguments(val):
+def arguments(val, default=ARGS_NONE):
     def func(payload, *args, **kwargs):
         if isinstance(val, int):
-            return args[val]
+            return args[val] if default is ARGS_NONE else default
         elif isinstance(val, str):
-            return kwargs[val]
+            return kwargs[val] if default is ARGS_NONE else default
         return None
     return func
 
