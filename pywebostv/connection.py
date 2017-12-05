@@ -336,6 +336,20 @@ class ApplicationControl(WebOSControlBase):
 
 
 class InputControl(WebOSControlBase):
+    COMMANDS = {
+        "type": {
+            "uri": "ssap://com.webos.service.ime/insertText",
+            "args": [str],
+            "payload": {"text": arguments(0), "replace": 0}
+        },
+        "delete": {
+            "uri": "ssap://com.webos.service.ime/deleteCharacters",
+            "payload": [int],
+            "payload": {"count": arguments(0)}
+        },
+        "enter": {"uri": "ssap://com.webos.service.ime/sendEnterKey"},
+    }
+
     INPUT_COMMANDS = {
         "move": {
             "command": [["type", "move"],
@@ -374,6 +388,8 @@ class InputControl(WebOSControlBase):
     def __getattr__(self, name):
         if name in self.INPUT_COMMANDS:
             return self.exec_mouse_command(name, self.INPUT_COMMANDS[name])
+        if name in self.COMMANDS:
+            return super(InputControl, self).__getattr__(name)
         raise AttributeError(name)
 
     def connect_input(self):
