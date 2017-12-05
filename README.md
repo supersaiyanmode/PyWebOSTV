@@ -71,6 +71,11 @@ Currently working on more controls and unit test cases. Upon testing, I will upl
     inp.home()
     inp.back()
     
+    # Following 3 lines are valid only when an input field is focussed on TV.
+    inp.type("This sends keyboard input!")
+    inp.enter()  # Return key.
+    inp.delete(10)  # Backspace 10 chars
+    
     inp.disconnect_input()
 
 
