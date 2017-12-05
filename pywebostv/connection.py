@@ -104,22 +104,24 @@ def arguments(val, default=ARGS_NONE):
 
 
 def process_payload(obj, *args, **kwargs):
-    if isinstance(obj, Sequence):
+    if isinstance(obj, list):
         res = []
         for item in obj:
             if isinstance(item, Callable):
                 res.append(item(obj, *args, **kwargs))
             else:
-                res.append(item)
+                res.append(process_payload(item, *args, **kwargs))
         return res
-    elif isinstance(obj, Mapping):
+    elif isinstance(obj, dict):
         res = {}
         for key, value in obj.items():
             if isinstance(value, Callable):
                 res[key] = value(obj, *args, **kwargs)
             else:
-                res[key] = value
+                res[key] = process_payload(value, *args, **kwargs)
         return res
+    else:
+        return obj
 
 
 class WebOSClient(WebSocketClient):
