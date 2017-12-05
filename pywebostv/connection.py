@@ -333,3 +333,69 @@ class ApplicationControl(WebOSControlBase):
 
         self.request("ssap://system.launcher/close", launch_info, block=block,
                      callback=callback)
+
+
+class InputControl(WebOSControlBase):
+    INPUT_COMMANDS = {
+        "move": {
+            "command": [["type", "move"],
+                        ["dx", arguments(0)],
+                        ["dy", arguments(1)],
+                        ["down", arguments("drag", 0)]]
+        },
+        "click": {
+            "command": [["type", "click"]]
+        },
+        "scroll": {
+            "command": [["type", "scroll"],
+                        ["dx", arguments(0)],
+                        ["dy", arguments(1)]]
+        },
+        "left": {
+            "command": [["type", "button"], ["name", "LEFT"]]
+        },
+        "right": {
+            "command": [["type", "button"], ["name", "RIGHT"]]
+        },
+        "down": {
+            "command": [["type", "button"], ["name", "DOWN"]]
+        },
+        "up": {
+            "command": [["type", "button"], ["name", "UP"]]
+        },
+        "home": {
+            "command": [["type", "button"], ["name", "HOME"]]
+        },
+        "back": {
+            "command": [["type", "button"], ["name", "BACK"]]
+        }
+    }
+
+    def __getattr__(self, name):
+        if name in self.INPUT_COMMANDS:
+            return self.exec_mouse_command(name, self.INPUT_COMMANDS[name])
+        raise AttributeError(name)
+
+    def connect_input(self):
+        uri = "ssap://com.webos.service.networkinput/getPointerInputSocket"
+        res = self.request(uri, None, block=True)
+        sock_path = res.get("payload").get("socketPath")
+        if not sock_path:
+            raise Exception("Unable to connect to mouse.")
+        self.mouse_ws = WebSocketClient(sock_path, exclude_headers=["Origin"])
+        self.mouse_ws.connect()
+
+    def disconnect_input(self):
+        self.mouse_ws.close()
+
+    def exec_mouse_command(self, cmd_name, cmd_info):
+        def request_func(*args, **kwargs):
+            callback = kwargs.pop('callback', None)
+            block = kwargs.pop('block', True)
+            timeout = kwargs.pop('timeout', 60)
+            params = process_payload(cmd_info["command"], *args, **kwargs)
+            print("PARAMS: ", params)
+            payload = "\n".join(":".join(str(y) for y in x) for x in params)
+            payload += "\n\n"
+            self.mouse_ws.send(payload)
+        return request_func
