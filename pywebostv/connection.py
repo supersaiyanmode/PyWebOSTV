@@ -394,7 +394,6 @@ class InputControl(WebOSControlBase):
             block = kwargs.pop('block', True)
             timeout = kwargs.pop('timeout', 60)
             params = process_payload(cmd_info["command"], *args, **kwargs)
-            print("PARAMS: ", params)
             payload = "\n".join(":".join(str(y) for y in x) for x in params)
             payload += "\n\n"
             self.mouse_ws.send(payload)
