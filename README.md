@@ -73,3 +73,8 @@ At the moment, I haven't been able to do any kind of extensive testing. No unit 
 
 
 More controls coming soon!
+
+
+# Credits
+ - [klattimer](https://github.com/klattimer/LGWebOSRemote) for his library! Since WebOS team decided against providing any sort of documentation, his repository was extremely useful for an initial implementation
+ - As far as input controls are concerned, they are based on the Java package written by [Connect-SDK folks](https://github.com/ConnectSDK/Connect-SDK-Android-Core/tree/master/src/com/connectsdk/service/webos)!
