@@ -1,6 +1,27 @@
+import json
+
 from pytest import raises
+from ws4py.client.threadedclient import WebSocketClient
 
 from pywebostv.connection import arguments, process_payload
+
+
+class MockedClientBase(object):
+    def setup_method(self):
+        test = self
+
+        def fake_send(self, msg):
+            test.sent_message = msg
+
+        self.backup_send = WebSocketClient.send
+        WebSocketClient.send = fake_send
+
+    def teardown_method(self):
+        WebSocketClient.send = self.backup_send
+
+    def assert_sent_message(self, obj):
+        assert json.loads(self.send_message) == obj
+
 
 class TestArgumentExtraction(object):
     def test_bad_argument_param(self):
