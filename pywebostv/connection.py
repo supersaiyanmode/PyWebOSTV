@@ -173,7 +173,7 @@ class WebOSClient(WebSocketClient):
                 raise Exception("Failed to register.")
 
     def send(self, request_type, uri, payload, unique_id=None, get_queue=False,
-             callback=None):
+             callback=None, cur_time=time.time):
         if unique_id is None:
             unique_id = str(uuid4())
 
@@ -181,9 +181,9 @@ class WebOSClient(WebSocketClient):
             wait_queue = Queue()
             callback = wait_queue.put
 
-        with self.waiter_lock:
-            if callback is not None:
-                self.waiters[unique_id] = (callback, time.time())
+        if callback is not None:
+            with self.waiter_lock:
+                self.waiters[unique_id] = (callback, cur_time())
 
         obj = {"type": request_type, "id": unique_id}
         if uri is not None:
