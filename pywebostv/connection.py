@@ -117,7 +117,7 @@ def process_payload(obj, *args, **kwargs):
         res = []
         for item in obj:
             if isinstance(item, Callable):
-                res.append(item(obj, *args, **kwargs))
+                res.append(item(*args, **kwargs))
             else:
                 res.append(process_payload(item, *args, **kwargs))
         return res
@@ -125,7 +125,7 @@ def process_payload(obj, *args, **kwargs):
         res = {}
         for key, value in obj.items():
             if isinstance(value, Callable):
-                res[key] = value(obj, *args, **kwargs)
+                res[key] = value(*args, **kwargs)
             else:
                 res[key] = process_payload(value, *args, **kwargs)
         return res
