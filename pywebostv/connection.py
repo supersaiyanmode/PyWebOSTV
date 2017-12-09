@@ -189,10 +189,7 @@ class WebOSClient(WebSocketClient):
         if uri is not None:
             obj["uri"] = uri
         if payload is not None:
-            if isinstance(payload, str) or True:
-                obj["payload"] = payload
-            else:
-                obj["payload"] = json.dumps(payload)
+            obj["payload"] = payload
 
         with self.send_lock:
             super(WebOSClient, self).send(json.dumps(obj))
