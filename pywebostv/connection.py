@@ -200,6 +200,18 @@ class WebOSClient(WebSocketClient):
         if get_queue:
             return wait_queue
 
+    def subscribe(self, uri, callback, payload=None):
+        unique_id = str(uuid4())
+        self.send('subscribe', uri, payload, unique_id=unique_id,
+                  callback=callback, cur_time=lambda: None)
+        return unique_id
+
+    def unsubscribe(self, unique_id):
+        with self.waiter_lock:
+            self.waiters.pop(unique_id)
+
+        self.send('unsubscribe', uri, payload=None)
+
     def received_message(self, msg):
         obj = json.loads(str(msg))
 
@@ -214,7 +226,7 @@ class WebOSClient(WebSocketClient):
         cur_time = time.time()
         for key, value in self.waiters.items():
             callback, created_time = value
-            if created_time + delta < cur_time:
+            if created_time and created_time + delta < cur_time:
                 to_clear.append(key)
 
         for key in to_clear:
