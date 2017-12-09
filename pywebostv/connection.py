@@ -94,12 +94,21 @@ REGISTRATION_PAYLOAD = {
 ARGS_NONE = ()
 
 def arguments(val, default=ARGS_NONE):
-    def func(payload, *args, **kwargs):
-        if isinstance(val, int):
-            return args[val] if default is ARGS_NONE else default
-        elif isinstance(val, str):
-            return kwargs[val] if default is ARGS_NONE else default
-        return None
+    if type(val) not in (str, int):
+        raise ValueError("Only numeric indices, or string keys allowed.")
+
+    def func(*args, **kwargs):
+        try:
+            if isinstance(val, int):
+                if default is ARGS_NONE:
+                    return args[val]
+                return args[val] if 0 <= val < len(args) else default
+            elif isinstance(val, str):
+                if default is ARGS_NONE:
+                    return kwargs[val]
+                return kwargs.get(val, default)
+        except (KeyError, IndexError):
+            raise TypeError("Bad arguments.")
     return func
 
 
