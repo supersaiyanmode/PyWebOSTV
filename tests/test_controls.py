@@ -3,7 +3,7 @@ import json
 from pytest import raises
 from ws4py.client.threadedclient import WebSocketClient
 
-from pywebostv.connection import arguments, process_payload
+from pywebostv.connection import arguments, process_payload, WebOSClient
 
 
 class MockedClientBase(object):
@@ -20,7 +20,7 @@ class MockedClientBase(object):
         WebSocketClient.send = self.backup_send
 
     def assert_sent_message(self, obj):
-        assert json.loads(self.send_message) == obj
+        assert json.loads(self.sent_message) == obj
 
 
 class TestArgumentExtraction(object):
@@ -68,3 +68,44 @@ class TestProcessPayload(object):
             "level1a": {1, 2}
         }
         assert process_payload(payload, 1, 2, a=4, b=5) == expected
+
+
+class TestWebOSClient(MockedClientBase):
+    def test_unique_id(self):
+        uid = "!23"
+        client = WebOSClient("ws://abc:123")
+        client.send('req', 'uri', {"item": "payload"}, unique_id=uid)
+
+        self.assert_sent_message({
+            "id": "!23",
+            "payload": {"item": "payload"},
+            "type": "req",
+            "uri": "uri"
+        })
+
+    def test_get_queue(self):
+        client = WebOSClient("ws://b")
+        queue = client.send('req', 'uri', {"item": "payload"}, unique_id="1",
+                            get_queue=True)
+        client.received_message(json.dumps({"id": "1", "test": "test"}))
+
+        assert queue.get(block=True, timeout=1) == dict(id="1", test="test")
+
+    def test_send_callback(self):
+        obj = {}
+
+        def callback(res):
+            obj["res"] = res
+
+        client = WebOSClient("ws://b")
+        client.send('req', 'uri', {"item": "payload"}, callback=callback,
+                    unique_id="1")
+        client.received_message(json.dumps({"id": "1", "test": "test"}))
+
+        assert obj["res"] == dict(id="1", test="test")
+
+    def test_send_minimum_params(self):
+        client = WebOSClient("ws://a")
+        client.send('req', None, None, unique_id="1")
+
+        self.assert_sent_message({"type": "req", "id": "1"})
