@@ -50,6 +50,11 @@ class TestArgumentExtraction(object):
         assert args() == {1, 2}
         assert args("a", "b", "c") == "c"
 
+    def test_postprocess(self):
+        args = arguments(2, postprocess=lambda x: 1, default={1, 2})
+        assert args() == {1, 2}
+        assert args("a", "b", "c") == 1
+
 
 class TestProcessPayload(object):
     def test_process_payload(self):

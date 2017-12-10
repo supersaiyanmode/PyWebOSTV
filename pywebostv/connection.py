@@ -93,7 +93,7 @@ REGISTRATION_PAYLOAD = {
 
 ARGS_NONE = ()
 
-def arguments(val, default=ARGS_NONE):
+def arguments(val, postprocess=lambda x: x, default=ARGS_NONE):
     if type(val) not in (str, int):
         raise ValueError("Only numeric indices, or string keys allowed.")
 
@@ -101,12 +101,13 @@ def arguments(val, default=ARGS_NONE):
         try:
             if isinstance(val, int):
                 if default is ARGS_NONE:
-                    return args[val]
-                return args[val] if 0 <= val < len(args) else default
+                    return postprocess(args[val])
+                valid_index = 0 <= val < len(args)
+                return postprocess(args[val]) if valid_index else default
             elif isinstance(val, str):
                 if default is ARGS_NONE:
-                    return kwargs[val]
-                return kwargs.get(val, default)
+                    return postprocess(kwargs[val])
+                return postprocess(kwargs[val]) if val in kwargs else default
         except (KeyError, IndexError):
             raise TypeError("Bad arguments.")
     return func
