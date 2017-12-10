@@ -115,21 +115,11 @@ def arguments(val, postprocess=lambda x: x, default=ARGS_NONE):
 
 def process_payload(obj, *args, **kwargs):
     if isinstance(obj, list):
-        res = []
-        for item in obj:
-            if isinstance(item, Callable):
-                res.append(item(*args, **kwargs))
-            else:
-                res.append(process_payload(item, *args, **kwargs))
-        return res
+        return [process_payload(item, *args, **kwargs) for item in obj]
     elif isinstance(obj, dict):
-        res = {}
-        for key, value in obj.items():
-            if isinstance(value, Callable):
-                res[key] = value(*args, **kwargs)
-            else:
-                res[key] = process_payload(value, *args, **kwargs)
-        return res
+        return {k: process_payload(v, *args, **kwargs) for k, v in obj.items()}
+    elif isinstance(obj, Callable):
+        return obj(*args, **kwargs)
     else:
         return obj
 

@@ -74,6 +74,9 @@ class TestProcessPayload(object):
         }
         assert process_payload(payload, 1, 2, a=4, b=5) == expected
 
+    def test_just_callable_arg(self):
+        assert process_payload(lambda x: x**2, 2) == 4
+
 
 class TestWebOSClient(MockedClientBase):
     def test_unique_id(self):
