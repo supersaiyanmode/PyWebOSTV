@@ -245,11 +245,17 @@ class WebOSControlBase(object):
     def exec_command(self, cmd, cmd_info):
         def request_func(*args, **kwargs):
             callback = kwargs.pop('callback', None)
-            block = kwargs.pop('block', False)
+            return_fn = cmd_info.pop('return', None)
+            block = bool(return_fn) or kwargs.pop('block', False)
             timeout = kwargs.pop('timeout', 60)
             params = process_payload(cmd_info.get("payload"), *args, **kwargs)
-            return self.request(cmd_info["uri"], params,
-                                callback=callback, block=block, timeout=timeout)
+            if block:
+                res = self.request(cmd_info["uri"], params, block=block,
+                                   timeout=timeout)
+                return return_fn(res.get("payload"))
+            elif callback:
+                self.request(cmd_info["uri"], params, timeout=timeout,
+                             callback=lambda p: p.get("payload"))
         return request_func
 
 
@@ -292,56 +298,33 @@ class SystemControl(WebOSControlBase):
 
 class ApplicationControl(WebOSControlBase):
     COMMANDS = {
+        "list_apps": {
+            "uri": "ssap://com.webos.applicationManager/listApps",
+            "args": [],
+            "kwargs": {},
+            "payload": {},
+            "return": lambda payload: payload.get("returnValue") and \
+                                      [Application(x) for x in payload["apps"]]
+        },
+        "launch": {
+            "uri": "ssap://system.launcher/launch",
+            "args": [Application],
+            "kwargs": {"content_id": str, "params": dict},
+            "payload": {
+                "id": arguments(0, postprocess=lambda app: app["id"]),
+                "contentId": arguments("content_id", default=None),
+                "params": arguments("params", default=None)
+            },
+            "return": lambda p: p.pop("returnValue") and  p
+        },
+        "close": {
+            "uri": "ssap://system.launcher/close",
+            "args": [dict],
+            "kwargs": {},
+            "payload": arguments(0),
+            "return": lambda p: p.pop("returnValue")
+        }
     }
-
-    def list_apps(self):
-        res = self.request("ssap://com.webos.applicationManager/listApps",
-                           params=None, block=True)
-        if not res.get("payload", {}).get("returnValue"):
-            raise Exception("Could not list apps.")
-
-        return [Application(x) for x in res["payload"]["apps"]]
-
-    def launch(self, app, content_id=None, params=None, block=True,
-               callback=None, timeout=None):
-        payload = {"id": app["id"]}
-        if content_id is not None:
-            payload["contentId"] = content_id
-        if params is not None:
-            payload["params"] = params
-
-        response_received = Event()
-        launch_data = []
-
-        def save_launch_info(response):
-            launch_info = response["payload"]
-            if launch_info.get("returnValue"):
-                launch_info.pop("returnValue")
-                launch_data.append(launch_info)
-            else:
-                launch_info = None
-
-            if block:
-                response_received.set()
-            if callback:
-                callback(launch_info)
-
-        self.request("ssap://system.launcher/launch", payload, block=False,
-                     callback=save_launch_info)
-
-        if block:
-            response_received.wait(timeout=timeout)
-            if not launch_data:
-                raise Exception("Unable to launch app.")
-            return launch_data[0]
-
-    def close(self, launch_info, block=False, callback=None):
-        sess_id = launch_info.get("sessionId")
-        if not sess_id:
-            raise Exception("Session not found.")
-
-        self.request("ssap://system.launcher/close", launch_info, block=block,
-                     callback=callback)
 
 
 class InputControl(WebOSControlBase):
