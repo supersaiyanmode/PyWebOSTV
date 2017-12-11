@@ -8,7 +8,7 @@ from uuid import uuid4
 from ws4py.client.threadedclient import WebSocketClient
 
 from pywebostv.discovery import discover
-from pywebostv.model import Application
+from pywebostv.model import Application, InputSource
 
 
 SIGNATURE = ("eyJhbGdvcml0aG0iOiJSU0EtU0hBMjU2Iiwia2V5SWQiOiJ0ZXN0LXNpZ25pbm" +
@@ -406,3 +406,25 @@ class InputControl(WebOSControlBase):
             payload += "\n\n"
             self.mouse_ws.send(payload)
         return request_func
+
+
+class SourceControl(WebOSControlBase):
+    COMMANDS = {
+        "list_sources": {
+            "uri": "ssap://tv/getExternalInputList",
+            "args": [],
+            "kwargs": {},
+            "payload": {},
+            "return": lambda payload: payload.get("returnValue") and \
+                                      list(map(InputSource, payload["devices"]))
+        },
+        "set_source": {
+            "uri": "ssap://tv/switchInput",
+            "args": [InputSource],
+            "kwargs": {},
+            "payload": {
+                "inputId": arguments(0, postprocess=lambda inp: inp["id"]),
+            },
+            "return": lambda p: p.pop("returnValue") and  p
+        },
+    }
