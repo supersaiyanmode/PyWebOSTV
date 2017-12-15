@@ -130,10 +130,15 @@ class WebOSClient(WebSocketClient):
 
     def __init__(self, host):
         ws_url = "ws://{}:3000/".format(host)
-        super(WebOSClient, self).__init__(ws_url, exclude_headers=["Origin"])
+        super(WebOSClient, self).__init__(ws_url)
         self.waiters = {}
         self.waiter_lock = RLock()
         self.send_lock = RLock()
+
+    @property
+    def handshake_headers(self):
+        headers = super(WebOSClient, self).handshake_headers
+        return [(k, v) for k, v in headers if k.lower() != 'origin']
 
     @staticmethod
     def discover():
