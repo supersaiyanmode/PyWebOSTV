@@ -11,7 +11,7 @@ before_script:
   - export PYTHONPATH=$PYTHONPATH:$(pwd)
 
 script:
-  - coverage run --source app -m py.test
+  - coverage run --source pywebostv -m py.test
 
 after_success:
   - coveralls
