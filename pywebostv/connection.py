@@ -256,6 +256,8 @@ class WebOSControlBase(object):
             elif callback:
                 self.request(cmd_info["uri"], params, timeout=timeout,
                              callback=lambda p: p.get("payload"))
+            else:
+                self.request(cmd_info["uri"], params)
         return request_func
 
 
