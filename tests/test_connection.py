@@ -102,3 +102,18 @@ class TestWebOSClient(MockedClientBase):
 
         with raises(ValueError):
             client.unsubscribe(uri)
+
+    def test_new_registration(self):
+        client = WebOSClient("ws://a")
+        store = {}
+        with raises(Exception, message="Timeout."):
+            next(client.register(store, timeout=1))
+
+        assert 'client-key' not in self.sent_message
+
+        store["client_key"] = "KEY!@#"
+
+        with raises(Exception, message="Timeout."):
+            next(client.register(store, timeout=1))
+
+        assert 'KEY!@#' in self.sent_message
