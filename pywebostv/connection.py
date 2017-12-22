@@ -3,7 +3,7 @@
 import json
 import time
 from queue import Queue, Empty
-from threading import RLock, Event
+from threading import RLock
 from uuid import uuid4
 
 from ws4py.client.threadedclient import WebSocketClient
@@ -92,7 +92,14 @@ REGISTRATION_PAYLOAD = {
 }
 
 
-class WebOSClient(WebSocketClient):
+class WebOSWebSocketClient(WebSocketClient):
+    @property
+    def handshake_headers(self):
+        headers = super(WebOSWebSocketClient, self).handshake_headers
+        return [(k, v) for k, v in headers if k.lower() != 'origin']
+
+
+class WebOSClient(WebOSWebSocketClient):
     PROMPTED = 1
     REGISTERED = 2
 
@@ -101,12 +108,9 @@ class WebOSClient(WebSocketClient):
         super(WebOSClient, self).__init__(ws_url)
         self.waiters = {}
         self.waiter_lock = RLock()
+        self.subscribers = {}
+        self.subscriber_lock = RLock()
         self.send_lock = RLock()
-
-    @property
-    def handshake_headers(self):
-        headers = super(WebOSClient, self).handshake_headers
-        return [(k, v) for k, v in headers if k.lower() != 'origin']
 
     @staticmethod
     def discover():
@@ -162,12 +166,23 @@ class WebOSClient(WebSocketClient):
             return wait_queue
 
     def subscribe(self, uri, callback, payload=None):
+        def func(obj):
+            callback(obj.get("payload"))
+
         unique_id = str(uuid4())
         self.send('subscribe', uri, payload, unique_id=unique_id,
-                  callback=callback, cur_time=lambda: None)
+                  callback=func, cur_time=lambda: None)
+        with self.subscriber_lock:
+            self.subscribers[unique_id] = uri
         return unique_id
 
     def unsubscribe(self, unique_id):
+        with self.subscriber_lock:
+            uri = self.subscribers.pop(unique_id, None)
+
+        if not uri:
+            raise ValueError("Subscription not found: {}".format(unique_id))
+
         with self.waiter_lock:
             self.waiters.pop(unique_id)
 
@@ -192,5 +207,3 @@ class WebOSClient(WebSocketClient):
 
         for key in to_clear:
             self.waiters.pop(key)
-
-

@@ -1,6 +1,7 @@
 import json
 import time
 from queue import Empty
+from threading import Event
 
 from pytest import raises
 
@@ -74,3 +75,27 @@ class TestWebOSClient(MockedClientBase):
             assert q1.get(block=True, timeout=1)
 
         assert q2.get(block=True, timeout=1) == {"id": "2", "test": "test2"}
+
+    def test_subscription(self):
+        result = []
+        result_event = Event()
+
+        def callback(obj):
+            result.append(obj)
+            result_event.set()
+
+        client = WebOSClient("ws://a")
+        uri = client.subscribe('unique_uri', callback)
+
+        client.received_message(json.dumps({"id": uri, "payload": [1]}))
+        client.received_message(json.dumps({"id": uri, "payload": [2]}))
+        client.received_message(json.dumps({"id": uri, "payload": [3]}))
+
+        result_event.wait()
+        assert result == [[1], [2], [3]]
+
+        result = []
+        client.unsubscribe(uri)
+
+        client.received_message(json.dumps({"id": uri, "payload": [1]}))
+        assert result == []
