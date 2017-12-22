@@ -92,7 +92,14 @@ REGISTRATION_PAYLOAD = {
 }
 
 
-class WebOSClient(WebSocketClient):
+class WebOSWebSocketClient(WebSocketClient):
+    @property
+    def handshake_headers(self):
+        headers = super(WebOSWebSocketClient, self).handshake_headers
+        return [(k, v) for k, v in headers if k.lower() != 'origin']
+
+
+class WebOSClient(WebOSWebSocketClient):
     PROMPTED = 1
     REGISTERED = 2
 
@@ -102,11 +109,6 @@ class WebOSClient(WebSocketClient):
         self.waiters = {}
         self.waiter_lock = RLock()
         self.send_lock = RLock()
-
-    @property
-    def handshake_headers(self):
-        headers = super(WebOSClient, self).handshake_headers
-        return [(k, v) for k, v in headers if k.lower() != 'origin']
 
     @staticmethod
     def discover():
@@ -192,5 +194,3 @@ class WebOSClient(WebSocketClient):
 
         for key in to_clear:
             self.waiters.pop(key)
-
-

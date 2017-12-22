@@ -1,8 +1,7 @@
 from collections import Callable
 from queue import Empty
 
-from ws4py.client.threadedclient import WebSocketClient
-
+from pywebostv.connection import WebOSWebSocketClient
 from pywebostv.model import Application, InputSource
 
 
@@ -211,7 +210,7 @@ class InputControl(WebOSControlBase):
         sock_path = res.get("payload").get("socketPath")
         if not sock_path:
             raise Exception("Unable to connect to mouse.")
-        self.mouse_ws = WebSocketClient(sock_path, exclude_headers=["Origin"])
+        self.mouse_ws = WebOSWebSocketClient(sock_path)
         self.mouse_ws.connect()
 
     def disconnect_input(self):
