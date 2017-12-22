@@ -99,3 +99,6 @@ class TestWebOSClient(MockedClientBase):
 
         client.received_message(json.dumps({"id": uri, "payload": [1]}))
         assert result == []
+
+        with raises(ValueError):
+            client.unsubscribe(uri)
