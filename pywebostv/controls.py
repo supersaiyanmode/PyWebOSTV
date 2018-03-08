@@ -167,7 +167,7 @@ class InputControl(WebOSControlBase):
             "command": [["type", "move"],
                         ["dx", arguments(0)],
                         ["dy", arguments(1)],
-                        ["down", arguments("drag", 0)]]
+                        ["down", arguments("drag", default=0)]]
         },
         "click": {
             "command": [["type", "click"]]
