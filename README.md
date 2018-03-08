@@ -35,16 +35,12 @@ for status in client.register(store):
         print("Please accept the connect on the TV!")
     elif status == WebOSClient.REGISTERED:
         print("Registration successful!")
-        
-media = MediaControl(client)
-system = SystemControl(client)
-app = ApplicationControl(client)
-inp = InputControl(client)
 ```
     
 #### Media Controls
 
 ```
+media = MediaControl(client)
 media.volume_up()
 media.volume_down()
 media.get_volume()
@@ -60,6 +56,7 @@ media.fast_forward()
 #### System Controls
 
 ```
+system = SystemControl(client)
 system.notify("This is a notification message!")
 system.power_off()
 system.info()
@@ -68,6 +65,7 @@ system.info()
 #### Application Controls
 
 ```
+app = ApplicationControl(client)
 apps = app.list_apps()
 launch_info = app.launch(apps[0], content_id="...", params=...)
 app.close(launch_info)
@@ -75,7 +73,9 @@ app.close(launch_info)
     
 #### Mouse and Button Controls
 
+You need to execute the first two commands.
 ```
+inp = InputControl(client)
 inp.connect_input()
 inp.move(10, 10) # Moves mouse
 inp.click()
@@ -92,6 +92,13 @@ inp.enter()  # Return key.
 inp.delete(10)  # Backspace 10 chars
 
 inp.disconnect_input()
+```
+
+#### Source Controls
+
+```
+sources = SourceControl(client)
+sources.set_source(list[0])
 ```
 
 More controls coming soon!
