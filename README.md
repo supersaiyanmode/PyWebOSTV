@@ -20,66 +20,86 @@ Currently working on more controls and unit test cases. Upon testing, I will upl
 
 ### How to use it?
 
-    from pywebostv.discovery import *
-    from pywebostv.connection import *
-    store = {}
-    client = WebOSClient.discover()[0]
-    client.connect()
-    for status in client.register(store):
-        if status == WebOSClient.PROMPTED:
-            print("Please accept the connect on the TV!")
-        elif status == WebOSClient.REGISTERED:
-            print("Registration successful!")
-            
-    media = MediaControl(client)
-    system = SystemControl(client)
-    app = ApplicationControl(client)
-    inp = InputControl(client)
+```
+from pywebostv.discovery import *
+from pywebostv.connection import *
+from pywebostv.controls import *
+store = {}
+# If you know the IP of your TV (quicker)
+# client = WebOSClient(<YOUR_IP>)
+# or to detect it automatically, but slower
+client = WebOSClient.discover()[0]
+client.connect()
+for status in client.register(store):
+    if status == WebOSClient.PROMPTED:
+        print("Please accept the connect on the TV!")
+    elif status == WebOSClient.REGISTERED:
+        print("Registration successful!")
+```
     
 #### Media Controls
 
-    media.volume_up()
-    media.volume_down()
-    media.get_volume()
-    media.set_volume(<int>)
-    media.mute(<mute status as boolean>)
-    media.play()
-    media.pause()
-    media.stop()
-    media.rewind()
-    media.fast_forward()
+```
+media = MediaControl(client)
+media.volume_up()
+media.volume_down()
+media.get_volume()
+media.set_volume(<int>)
+media.mute(<mute status as boolean>)
+media.play()
+media.pause()
+media.stop()
+media.rewind()
+media.fast_forward()
+```
     
 #### System Controls
 
-    system.notify("This is a notification message!")
-    system.power_off()
-    system.info()
-    
+```
+system = SystemControl(client)
+system.notify("This is a notification message!")
+system.power_off()
+system.info()
+```
+
 #### Application Controls
 
-    apps = app.list_apps()
-    launch_info = app.launch(apps[0], content_id="...", params=...)
-    app.close(launch_info)
+```
+app = ApplicationControl(client)
+apps = app.list_apps()
+launch_info = app.launch(apps[0], content_id="...", params=...)
+app.close(launch_info)
+```
     
 #### Mouse and Button Controls
 
-    inp.connect_input()
-    inp.move(10, 10) # Moves mouse
-    inp.click()
-    inp.up()
-    inp.down()
-    inp.left()
-    inp.right()
-    inp.home()
-    inp.back()
-    
-    # Following 3 lines are valid only when an input field is focussed on TV.
-    inp.type("This sends keyboard input!")
-    inp.enter()  # Return key.
-    inp.delete(10)  # Backspace 10 chars
-    
-    inp.disconnect_input()
+You need to execute the first two commands.
+```
+inp = InputControl(client)
+inp.connect_input()
+inp.move(10, 10) # Moves mouse
+inp.click()
+inp.up()
+inp.down()
+inp.left()
+inp.right()
+inp.home()
+inp.back()
 
+# Following 3 lines are valid only when an input field is focussed on TV.
+inp.type("This sends keyboard input!")
+inp.enter()  # Return key.
+inp.delete(10)  # Backspace 10 chars
+
+inp.disconnect_input()
+```
+
+#### Source Controls
+
+```
+sources = SourceControl(client)
+sources.set_source(list[0])
+```
 
 More controls coming soon!
 
