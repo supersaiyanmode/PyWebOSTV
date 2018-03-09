@@ -24,10 +24,17 @@ Currently working on more controls and unit test cases. Upon testing, I will upl
 from pywebostv.discovery import *
 from pywebostv.connection import *
 from pywebostv.controls import *
+
+# The 'store' gets populated during the registration process. If it is 
+# empty, a registration prompt will show up on the TV. You can pass any
+# dictionary-like interface instead -- that when values are set, will 
+# persist to a DB, a config file or something similar.
 store = {}
-# If you know the IP of your TV (quicker)
-# client = WebOSClient(<YOUR_IP>)
-# or to detect it automatically, but slower
+
+# Scans the current network to discover TV. Avoid [0] in real code.
+# If you already know the IP, you could skip the slow scan and 
+# instead simply say:
+#    client = WebOSClient("<IP Address of TV>")
 client = WebOSClient.discover()[0]
 client.connect()
 for status in client.register(store):
