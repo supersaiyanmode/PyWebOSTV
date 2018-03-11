@@ -117,25 +117,32 @@ class TestWebOSClient(MockedClientBase):
         with raises(Exception):
             list(client.register({}, timeout=5))
 
-    def test_registration_empty_store(self):
+    def test_registration(self):
         client = WebOSClient("test-host")
         sent_event = Event()
 
-        def send_response():
-            sent_event.wait()
-            client.received_message(json.dumps({
-                "id": "1",
-                "payload": {"pairingType": "PROMPT"}
-            }))
-            client.received_message(json.dumps({
-                "id": "1",
-                "payload": {"client-key": "xyz"},
-                "type": "registered"
-            }))
-            client.received_message(json.dumps({
-                "id": "1",
-                "type": "wrong-response"
-            }))
+        def make_response(prompt, registered, wrong):
+            def send_response():
+                sent_event.wait()
+                sent_event.clear()
+
+                if prompt:
+                    client.received_message(json.dumps({
+                        "id": "1",
+                        "payload": {"pairingType": "PROMPT"}
+                    }))
+                if registered:
+                    client.received_message(json.dumps({
+                        "id": "1",
+                        "payload": {"client-key": "xyz"},
+                        "type": "registered"
+                    }))
+                if wrong:
+                    client.received_message(json.dumps({
+                        "id": "1",
+                        "type": "wrong-response"
+                    }))
+            return send_response
 
         def patched_send(*args, **kwargs):
             obj = WebOSClient.send(client, unique_id="1", *args, **kwargs)
@@ -143,13 +150,21 @@ class TestWebOSClient(MockedClientBase):
             return obj
 
         client.send = patched_send
-        Thread(target=send_response).start()
 
         store = {}
+        Thread(target=make_response(True, True, False)).start()
         gen = client.register(store, timeout=10)
         assert next(gen) == WebOSClient.PROMPTED
         assert next(gen) == WebOSClient.REGISTERED
-        with raises(Exception):
-            next(gen)
 
         assert store == {"client_key": "xyz"}
+
+        # Test with non-empty store.
+        Thread(target=make_response(False, True, False)).start()
+        list(client.register(store, timeout=10)) == [WebOSClient.REGISTERED]
+        assert "xyz" in self.sent_message
+
+        # Test wrong response.
+        Thread(target=make_response(False, False, True)).start()
+        with raises(Exception):
+            list(client.register(store, timeout=10))
