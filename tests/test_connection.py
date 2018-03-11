@@ -101,6 +101,9 @@ class TestWebOSClient(MockedClientBase):
         client.received_message(json.dumps({"id": uri, "payload": [1]}))
         assert result == []
 
+        with raises(Exception):
+            client.unsubscribe(uri)
+
     def test_discovery(self):
         def mock_discover(*args, **kwargs):
             return ["host1", "host2"]
