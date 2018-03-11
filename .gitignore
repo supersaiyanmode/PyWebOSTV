@@ -102,3 +102,6 @@ ENV/
 
 # Pycharm Jetbrains
 .idea/
+
+# Pytest Cache
+.pytest_cache
