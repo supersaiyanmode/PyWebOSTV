@@ -1,10 +1,11 @@
 import json
 import time
 from queue import Empty
-from threading import Event
+from threading import Event, Thread
 
 from pytest import raises
 
+import pywebostv.connection
 from pywebostv.connection import WebOSClient
 
 from utils import MockedClientBase
@@ -117,3 +118,56 @@ class TestWebOSClient(MockedClientBase):
             next(client.register(store, timeout=1))
 
         assert 'KEY!@#' in self.sent_message
+
+    def test_discovery(self):
+        def mock_discover(*args, **kwargs):
+            return ["host1", "host2"]
+        backup = pywebostv.connection.discover
+        pywebostv.connection.discover = mock_discover
+
+        expected = ["ws://{}:3000/".format(x) for x in ["host1", "host2"]]
+        assert [x.url for x in WebOSClient.discover()] == expected
+
+        pywebostv.connection.discover = backup
+
+    def test_registration_timeout(self):
+        client = WebOSClient("test-host")
+        with raises(Exception):
+            list(client.register({}, timeout=5))
+
+    def test_registration_empty_store(self):
+        client = WebOSClient("test-host")
+        sent_event = Event()
+
+        def send_response():
+            sent_event.wait()
+            client.received_message(json.dumps({
+                "id": "1",
+                "payload": {"pairingType": "PROMPT"}
+            }))
+            client.received_message(json.dumps({
+                "id": "1",
+                "payload": {"client-key": "xyz"},
+                "type": "registered"
+            }))
+            client.received_message(json.dumps({
+                "id": "1",
+                "type": "wrong-response"
+            }))
+
+        def patched_send(*args, **kwargs):
+            obj = WebOSClient.send(client, unique_id="1", *args, **kwargs)
+            sent_event.set()
+            return obj
+
+        client.send = patched_send
+        Thread(target=send_response).start()
+
+        store = {}
+        gen = client.register(store, timeout=10)
+        assert next(gen) == WebOSClient.PROMPTED
+        assert next(gen) == WebOSClient.REGISTERED
+        with raises(Exception):
+            next(gen)
+
+        assert store == {"client_key": "xyz"}
