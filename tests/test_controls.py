@@ -28,10 +28,15 @@ class TestArgumentExtraction(object):
         with raises(TypeError):
             assert args()
 
-    def test_default_value(self):
+    def test_args_default_value(self):
         args = arguments(2, default={1, 2})
         assert args() == {1, 2}
         assert args("a", "b", "c") == "c"
+
+    def test_kwargs_default_value(self):
+        args = arguments("key", default="value")
+        assert args() == "value"
+        assert args("a", "b", key="blah") == "blah"
 
     def test_postprocess(self):
         args = arguments(2, postprocess=lambda x: 1, default={1, 2})
