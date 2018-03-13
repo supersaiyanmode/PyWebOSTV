@@ -101,11 +101,20 @@ inp.delete(10)  # Backspace 10 chars
 inp.disconnect_input()
 ```
 
+#### TV Controls
+
+```
+tv_control = TvControl()
+tv_control.channel_down()
+tv_control.channel_up()
+```
+
 #### Source Controls
 
 ```
-sources = SourceControl(client)
-sources.set_source(list[0])
+source_control = SourceControl(client)
+sources = source_control.list_sources()
+source_control.set_source(sources[0])
 ```
 
 More controls coming soon!
