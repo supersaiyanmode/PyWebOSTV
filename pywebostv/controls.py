@@ -102,6 +102,13 @@ class MediaControl(WebOSControlBase):
      }
 
 
+class TvControl(WebOSControlBase):
+    COMMANDS = {
+        "channel_down": {"uri": "ssap://tv/channelDown"},
+        "channel_up": {"uri": "ssap://tv/channelUp"},
+     }
+
+
 class SystemControl(WebOSControlBase):
     COMMANDS = {
         "power_off": {"uri": "ssap://system/turnOff"},
