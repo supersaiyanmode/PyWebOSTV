@@ -201,7 +201,13 @@ class InputControl(WebOSControlBase):
         },
         "back": {
             "command": [["type", "button"], ["name", "BACK"]]
-        }
+        },
+        "dash": {
+            "command": [["type", "button"], ["name", "DASH"]]
+        },
+        "info": {
+            "command": [["type", "button"], ["name", "INFO"]]
+        },
     }
 
     def __getattr__(self, name):
