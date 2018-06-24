@@ -15,7 +15,7 @@ setup(
     license='MIT',
     description='Library to remote control LG Web OS TV',
     long_description=open('README.md').read(),
-    long_description_content_type='text/markdown'
+    long_description_content_type='text/markdown',
     install_requires=[
         "ws4py",
         "requests[security]",
