@@ -6,7 +6,7 @@ except ImportError:
 
 setup(
     name='pywebostv',
-    version='0.8.1',
+    version='0.8.2',
     author='Srivatsan Iyer',
     author_email='supersaiyanmode.rox@gmail.com',
     packages=[
