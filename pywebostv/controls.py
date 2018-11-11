@@ -113,7 +113,8 @@ class SystemControl(WebOSControlBase):
     COMMANDS = {
         "power_off": {"uri": "ssap://system/turnOff"},
         "info": {
-            "uri": "ssap://com.webos.service.update/getCurrentSWInformation"
+            "uri": "ssap://com.webos.service.update/getCurrentSWInformation",
+            "return": lambda p: p.pop("returnValue") and p
         },
         "notify": {
             "uri": "ssap://system.notifications/createToast",
