@@ -40,7 +40,7 @@ def process_payload(obj, *args, **kwargs):
 
 
 class WebOSControlBase(object):
-    COMMANDS = []
+    COMMANDS = {}
 
     def __init__(self, client):
         self.client = client
