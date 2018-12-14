@@ -150,6 +150,14 @@ class ApplicationControl(WebOSControlBase):
             "validation": lambda payload: payload.pop("returnValue"),
             "validation_error": "Unable to launch application.",
         },
+        "get_current": {
+            "uri": "ssap://com.webos.applicationManager/getForegroundAppInfo",
+            "args": [],
+            "kwargs": {},
+            "payload": {},
+            "validity": lambda p: p.pop("returnValue"),
+            "return": lambda p: p["appId"],
+        },
         "close": {
             "uri": "ssap://system.launcher/close",
             "args": [dict],
