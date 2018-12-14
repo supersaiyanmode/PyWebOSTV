@@ -1,6 +1,6 @@
 from threading import Event
 
-from pytest import raises
+from pytest import raises, mark
 
 from pywebostv.controls import WebOSControlBase
 from pywebostv.controls import arguments, process_payload
@@ -70,6 +70,13 @@ class TestProcessPayload(object):
 
 
 class TestWebOSControlBase(object):
+    def test_missing_attribute(self):
+        client = FakeClient()
+        control_base = WebOSControlBase(client)
+        control_base.COMMANDS = {}
+        with raises(AttributeError):
+            control_base.attribute()
+
     def test_exec_command_blocking(self):
         client = FakeClient()
         control_base = WebOSControlBase(client)
@@ -154,26 +161,6 @@ class TestWebOSControlBase(object):
 
 
 class TestMediaControl(object):
-    def test_volume_up(self):
-        client = FakeClient()
-        media = MediaControl(client)
-        media.volume_up()
-
-        client.assert_sent_message_without_id({
-            "type": "request",
-            "uri": "ssap://audio/volumeUp"
-        })
-
-    def test_volume_down(self):
-        client = FakeClient()
-        media = MediaControl(client)
-        media.volume_down()
-
-        client.assert_sent_message_without_id({
-            "type": "request",
-            "uri": "ssap://audio/volumeDown"
-        })
-
     def test_mute(self):
         client = FakeClient()
         media = MediaControl(client)
@@ -196,13 +183,35 @@ class TestMediaControl(object):
             "payload": {"mute": False}
         })
 
-    def set_volume(self):
+    def test_set_volume(self):
         client = FakeClient()
         media = MediaControl(client)
-        media.set_volume(30)
+        media.set_volume(30, block=False)
 
         client.assert_sent_message_without_id({
             "type": "request",
             "uri": "ssap://audio/setVolume",
             "payload": {"volume": 30}
         })
+
+    def test_get_volume(self):
+        client = FakeClient()
+        res = dict(returnValue=True, volume=1, mute=True, scenario="")
+        client.setup_response("ssap://audio/getVolume", res)
+        media = MediaControl(client)
+        assert media.get_volume(block=True)["volume"] == 1
+
+    @mark.parametrize("command,uri",
+                      [("volume_up", "ssap://audio/volumeUp"),
+                       ("volume_down", "ssap://audio/volumeDown"),
+                       ("play", "ssap://media.controls/play"),
+                       ("pause", "ssap://media.controls/pause"),
+                       ("stop", "ssap://media.controls/stop"),
+                       ("rewind", "ssap://media.controls/rewind"),
+                       ("fast_forward", "ssap://media.controls/fastForward")])
+    def test_commands(self, command, uri):
+        client = FakeClient()
+        media = MediaControl(client)
+        getattr(media, command)(block=False)
+
+        client.assert_sent_message_without_id({"type": "request", "uri": uri})
