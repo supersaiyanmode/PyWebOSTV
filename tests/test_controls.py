@@ -78,7 +78,7 @@ class TestWebOSControlBase(object):
         }
 
         client.setup_response("/test", {"resp": True})
-        assert control_base.test(block=True) == {"resp": True}
+        assert control_base.test() == {"resp": True}
 
     def test_exec_command_callback(self):
         client = FakeClient()
@@ -150,7 +150,7 @@ class TestWebOSControlBase(object):
 
         client.setup_response("/another-uri", {"resp": True})
         with raises(Exception):
-            control_base.test(block=True, timeout=1)
+            control_base.test(timeout=1)
 
 
 class TestMediaControl(object):
@@ -177,7 +177,7 @@ class TestMediaControl(object):
     def test_mute(self):
         client = FakeClient()
         media = MediaControl(client)
-        media.mute(True)
+        media.mute(True, block=False)
 
         client.assert_sent_message_without_id({
             "type": "request",
@@ -188,7 +188,7 @@ class TestMediaControl(object):
     def test_unmute(self):
         client = FakeClient()
         media = MediaControl(client)
-        media.mute(False)
+        media.mute(False, block=False)
 
         client.assert_sent_message_without_id({
             "type": "request",

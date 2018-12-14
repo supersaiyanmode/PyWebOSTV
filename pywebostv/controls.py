@@ -66,7 +66,7 @@ class WebOSControlBase(object):
             callback = kwargs.pop('callback', None)
             response_valid = cmd_info.get("validation", lambda p: True)
             return_fn = cmd_info.get('return', lambda x: x)
-            block = kwargs.pop('block', False)
+            block = kwargs.pop('block', True)
             timeout = kwargs.pop('timeout', 60)
             params = process_payload(cmd_info.get("payload"), *args, **kwargs)
 
