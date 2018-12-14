@@ -1,3 +1,5 @@
+from threading import Event
+
 from pytest import raises
 
 from pywebostv.controls import WebOSControlBase
@@ -65,6 +67,90 @@ class TestProcessPayload(object):
 
     def test_just_callable_arg(self):
         assert process_payload(lambda x: x**2, 2) == 4
+
+
+class TestWebOSControlBase(object):
+    def test_exec_command_blocking(self):
+        client = FakeClient()
+        control_base = WebOSControlBase(client)
+        control_base.COMMANDS = {
+            "test": {"uri": "/test"}
+        }
+
+        client.setup_response("/test", {"resp": True})
+        assert control_base.test(block=True) == {"resp": True}
+
+    def test_exec_command_callback(self):
+        client = FakeClient()
+        control_base = WebOSControlBase(client)
+        control_base.COMMANDS = {
+            "test": {"uri": "/test"}
+        }
+
+        response = []
+        event = Event()
+
+        def callback(status, resp):
+            response.append((status, resp))
+            event.set()
+
+        client.setup_response("/test", {"resp": True})
+        control_base.test(callback=callback)
+        event.wait()
+
+        assert response == [(True, {"resp": True})]
+
+    def test_exec_command_failed_callback(self):
+        client = FakeClient()
+        control_base = WebOSControlBase(client)
+        control_base.COMMANDS = {
+            "test": {
+                "uri": "/test",
+                "validation": lambda *args: False,
+                "validation_error": "Error"
+            }
+        }
+
+        response = []
+        event = Event()
+
+        def callback(status, resp):
+            response.append((status, resp))
+            event.set()
+
+        client.setup_response("/test", {"resp": True})
+        control_base.test(callback=callback)
+        event.wait()
+
+        assert response == [(False, "Error")]
+
+    def test_exec_command_failed_blocking(self):
+        client = FakeClient()
+        control_base = WebOSControlBase(client)
+        control_base.COMMANDS = {
+            "test": {
+                "uri": "/test",
+                "validation": lambda *args: False,
+                "validation_error": "Error"
+            },
+        }
+
+        client.setup_response("/test", {"resp": True})
+        with raises(ValueError):
+            control_base.test(block=True)
+
+    def test_exec_timeout(self):
+        client = FakeClient()
+        control_base = WebOSControlBase(client)
+        control_base.COMMANDS = {
+            "test": {
+                "uri": "/test",
+            },
+        }
+
+        client.setup_response("/another-uri", {"resp": True})
+        with raises(Exception):
+            control_base.test(block=True, timeout=1)
 
 
 class TestMediaControl(object):
