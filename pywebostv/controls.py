@@ -63,17 +63,28 @@ class WebOSControlBase(object):
     def exec_command(self, cmd, cmd_info):
         def request_func(*args, **kwargs):
             callback = kwargs.pop('callback', None)
+            response_valid = cmd_info.get("validation", lambda p: True)
             return_fn = cmd_info.get('return', None)
             block = bool(return_fn) or kwargs.pop('block', False)
             timeout = kwargs.pop('timeout', 60)
             params = process_payload(cmd_info.get("payload"), *args, **kwargs)
-            if block:
+
+            # callback in the args has higher priority.
+            if callback:
+                def callback_wrapper(payload):
+                    if not response_valid(payload):
+                        raise ValueError(cmd_info["validation_error"])
+                    return callback(return_fn(payload))
+
+                self.request(cmd_info["uri"], params, timeout=timeout,
+                             callback=callback_wrapper)
+            elif block:
                 res = self.request(cmd_info["uri"], params, block=block,
                                    timeout=timeout)
+                if not response_valid(res):
+                    raise ValueError(cmd_info["validation_error"])
+
                 return return_fn(res.get("payload"))
-            elif callback:
-                self.request(cmd_info["uri"], params, timeout=timeout,
-                             callback=lambda p: p.get("payload"))
             else:
                 self.request(cmd_info["uri"], params)
         return request_func
@@ -123,8 +134,9 @@ class ApplicationControl(WebOSControlBase):
             "args": [],
             "kwargs": {},
             "payload": {},
-            "return": lambda payload: payload.get("returnValue") and
-                                      [Application(x) for x in payload["apps"]]
+            "validation": lambda payload: payload.pop("returnValue"),
+            "validation_error": "Unable to retrieve apps list.",
+            "return": lambda payload: [Application(x) for x in payload["apps"]]
         },
         "launch": {
             "uri": "ssap://system.launcher/launch",
@@ -135,14 +147,16 @@ class ApplicationControl(WebOSControlBase):
                 "contentId": arguments("content_id", default=None),
                 "params": arguments("params", default=None)
             },
-            "return": lambda p: p.pop("returnValue") and p
+            "validation": lambda payload: payload.pop("returnValue"),
+            "validation_error": "Unable to launch application.",
         },
         "close": {
             "uri": "ssap://system.launcher/close",
             "args": [dict],
             "kwargs": {},
             "payload": arguments(0),
-            "return": lambda p: p.pop("returnValue")
+            "validation": lambda p: p.pop("returnValue"),
+            "validation_error": "Something went wrong while closing app.",
         }
     }
 
@@ -232,8 +246,9 @@ class SourceControl(WebOSControlBase):
             "args": [],
             "kwargs": {},
             "payload": {},
-            "return": lambda payload: payload.get("returnValue") and
-                                      list(map(InputSource, payload["devices"]))
+            "validation": lambda payload: payload.pop("returnValue"),
+            "validation_error": "Unable to get list of sources.",
+            "return": lambda p: [InputSource(x) for x in p["devices"]],
         },
         "set_source": {
             "uri": "ssap://tv/switchInput",
@@ -242,6 +257,7 @@ class SourceControl(WebOSControlBase):
             "payload": {
                 "inputId": arguments(0, postprocess=lambda inp: inp["id"]),
             },
-            "return": lambda p: p.pop("returnValue") and p
+            "validation": lambda p: p.pop("returnValue"),
+            "validation_error": "Unable to set source.",
         },
     }
