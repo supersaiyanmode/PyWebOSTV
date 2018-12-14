@@ -2,9 +2,12 @@
 
 import json
 import time
-from queue import Queue, Empty
 from threading import RLock
 from uuid import uuid4
+try:
+    from queue import Queue, Empty
+except ImportError:
+    from Queue import Queue, Empty
 
 from ws4py.client.threadedclient import WebSocketClient
 
