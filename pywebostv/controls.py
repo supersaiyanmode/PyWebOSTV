@@ -97,7 +97,11 @@ class MediaControl(WebOSControlBase):
     COMMANDS = {
         "volume_up": {"uri": "ssap://audio/volumeUp"},
         "volume_down": {"uri": "ssap://audio/volumeDown"},
-        "get_volume": {"uri": "ssap://audio/getVolume"},
+        "get_volume": {
+            "uri": "ssap://audio/getVolume",
+            "validation": lambda payload: payload.pop("returnValue"),
+            "validation_error": "Unable to get volume status."
+        },
         "set_volume": {
             "uri": "ssap://audio/setVolume",
             "args": [int],
