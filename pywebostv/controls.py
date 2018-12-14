@@ -47,13 +47,14 @@ class WebOSControlBase(object):
 
     def request(self, uri, params, callback=None, block=False, timeout=60):
         if block:
-            queue = self.client.send('request', uri, params, get_queue=True)
+            queue = self.client.send_message('request', uri, params,
+                                             get_queue=True)
             try:
                 return queue.get(timeout=timeout, block=True)
             except Empty:
                 raise Exception("Failed.")
         else:
-            self.client.send('request', uri, params, callback=callback)
+            self.client.send_message('request', uri, params, callback=callback)
 
     def __getattr__(self, name):
         if name in self.COMMANDS:

@@ -1,10 +1,11 @@
 from pytest import raises
 
-from pywebostv.connection import WebOSClient
+from pywebostv.controls import WebOSControlBase
 from pywebostv.controls import arguments, process_payload
 from pywebostv.controls import MediaControl
 
-from utils import MockedClientBase
+from utils import FakeClient
+
 
 class TestArgumentExtraction(object):
     def test_bad_argument_param(self):
@@ -66,57 +67,56 @@ class TestProcessPayload(object):
         assert process_payload(lambda x: x**2, 2) == 4
 
 
-class TestMediaControl(MockedClientBase):
+class TestMediaControl(object):
     def test_volume_up(self):
-        client = WebOSClient("ws://a")
+        client = FakeClient()
         media = MediaControl(client)
         media.volume_up()
 
-        self.assert_sent_message_without_id({
+        client.assert_sent_message_without_id({
             "type": "request",
             "uri": "ssap://audio/volumeUp"
         })
 
     def test_volume_down(self):
-        client = WebOSClient("ws://a")
+        client = FakeClient()
         media = MediaControl(client)
         media.volume_down()
 
-        self.assert_sent_message_without_id({
+        client.assert_sent_message_without_id({
             "type": "request",
             "uri": "ssap://audio/volumeDown"
         })
 
     def test_mute(self):
-        client = WebOSClient("ws://a")
+        client = FakeClient()
         media = MediaControl(client)
         media.mute(True)
 
-        self.assert_sent_message_without_id({
+        client.assert_sent_message_without_id({
             "type": "request",
             "uri": "ssap://audio/setMute",
             "payload": {"mute": True}
         })
 
     def test_unmute(self):
-        client = WebOSClient("ws://a")
+        client = FakeClient()
         media = MediaControl(client)
         media.mute(False)
 
-        self.assert_sent_message_without_id({
+        client.assert_sent_message_without_id({
             "type": "request",
             "uri": "ssap://audio/setMute",
             "payload": {"mute": False}
         })
 
     def set_volume(self):
-        client = WebOSClient("ws://a")
+        client = FakeClient()
         media = MediaControl(client)
         media.set_volume(30)
 
-        self.assert_sent_message_without_id({
+        client.assert_sent_message_without_id({
             "type": "request",
             "uri": "ssap://audio/setVolume",
             "payload": {"volume": 30}
         })
-
