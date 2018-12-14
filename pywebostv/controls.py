@@ -63,7 +63,7 @@ class WebOSControlBase(object):
     def exec_command(self, cmd, cmd_info):
         def request_func(*args, **kwargs):
             callback = kwargs.pop('callback', None)
-            return_fn = cmd_info.pop('return', None)
+            return_fn = cmd_info.get('return', None)
             block = bool(return_fn) or kwargs.pop('block', False)
             timeout = kwargs.pop('timeout', 60)
             params = process_payload(cmd_info.get("payload"), *args, **kwargs)
