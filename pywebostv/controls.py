@@ -72,10 +72,10 @@ class WebOSControlBase(object):
 
             # callback in the args has higher priority.
             if callback:
-                def callback_wrapper(payload):
-                    if not response_valid(payload):
-                        raise ValueError(cmd_info["validation_error"])
-                    return callback(return_fn(payload))
+                def callback_wrapper(res):
+                    if not response_valid(res):
+                        return callback(False, cmd_info["validation_error"])
+                    return callback(True, return_fn(res.get("payload")))
 
                 self.request(cmd_info["uri"], params, timeout=timeout,
                              callback=callback_wrapper)
