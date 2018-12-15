@@ -39,6 +39,12 @@ def process_payload(obj, *args, **kwargs):
         return obj
 
 
+def standard_validation(payload):
+    if not payload.pop("returnValue"):
+        return False, payload.pop("errorText", "Unknown error.")
+    return True, None
+
+
 class WebOSControlBase(object):
     COMMANDS = {}
 
@@ -64,7 +70,7 @@ class WebOSControlBase(object):
     def exec_command(self, cmd, cmd_info):
         def request_func(*args, **kwargs):
             callback = kwargs.pop('callback', None)
-            response_valid = cmd_info.get("validation", lambda p: True)
+            response_valid = cmd_info.get("validation", lambda p: (True, None))
             return_fn = cmd_info.get('return', lambda x: x)
             block = kwargs.pop('block', True)
             timeout = kwargs.pop('timeout', 60)
@@ -74,8 +80,9 @@ class WebOSControlBase(object):
             if callback:
                 def callback_wrapper(res):
                     payload = res.get("payload")
-                    if not response_valid(payload):
-                        return callback(False, cmd_info["validation_error"])
+                    status, message = response_valid(payload)
+                    if not status:
+                        return callback(False, message)
                     return callback(True, return_fn(payload))
 
                 self.request(cmd_info["uri"], params, timeout=timeout,
@@ -84,8 +91,9 @@ class WebOSControlBase(object):
                 res = self.request(cmd_info["uri"], params, block=block,
                                    timeout=timeout)
                 payload = res.get("payload")
-                if not response_valid(payload):
-                    raise ValueError(cmd_info["validation_error"])
+                status, message = response_valid(payload)
+                if not status:
+                    raise IOError(message)
 
                 return return_fn(payload)
             else:
@@ -99,8 +107,7 @@ class MediaControl(WebOSControlBase):
         "volume_down": {"uri": "ssap://audio/volumeDown"},
         "get_volume": {
             "uri": "ssap://audio/getVolume",
-            "validation": lambda payload: payload.pop("returnValue"),
-            "validation_error": "Unable to get volume status."
+            "validation": standard_validation,
         },
         "set_volume": {
             "uri": "ssap://audio/setVolume",
@@ -141,8 +148,7 @@ class ApplicationControl(WebOSControlBase):
             "args": [],
             "kwargs": {},
             "payload": {},
-            "validation": lambda payload: payload.pop("returnValue"),
-            "validation_error": "Unable to retrieve apps list.",
+            "validation": standard_validation,
             "return": lambda payload: [Application(x) for x in payload["apps"]]
         },
         "launch": {
@@ -154,8 +160,7 @@ class ApplicationControl(WebOSControlBase):
                 "contentId": arguments("content_id", default=None),
                 "params": arguments("params", default=None)
             },
-            "validation": lambda payload: payload.pop("returnValue"),
-            "validation_error": "Unable to launch application.",
+            "validation": standard_validation,
         },
         "get_current": {
             "uri": "ssap://com.webos.applicationManager/getForegroundAppInfo",
@@ -170,8 +175,7 @@ class ApplicationControl(WebOSControlBase):
             "args": [dict],
             "kwargs": {},
             "payload": arguments(0),
-            "validation": lambda p: p.pop("returnValue"),
-            "validation_error": "Something went wrong while closing app.",
+            "validation": standard_validation,
         }
     }
 
@@ -268,8 +272,7 @@ class SourceControl(WebOSControlBase):
             "args": [],
             "kwargs": {},
             "payload": {},
-            "validation": lambda payload: payload.pop("returnValue"),
-            "validation_error": "Unable to get list of sources.",
+            "validation": standard_validation,
             "return": lambda p: [InputSource(x) for x in p["devices"]],
         },
         "set_source": {
@@ -279,7 +282,6 @@ class SourceControl(WebOSControlBase):
             "payload": {
                 "inputId": arguments(0, postprocess=lambda inp: inp["id"]),
             },
-            "validation": lambda p: p.pop("returnValue"),
-            "validation_error": "Unable to set source.",
+            "validation": standard_validation,
         },
     }

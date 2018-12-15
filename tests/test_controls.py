@@ -115,7 +115,7 @@ class TestWebOSControlBase(object):
         control_base.COMMANDS = {
             "test": {
                 "uri": "/test",
-                "validation": lambda *args: False,
+                "validation": lambda *args: (False, "err"),
                 "validation_error": "Error"
             }
         }
@@ -131,7 +131,7 @@ class TestWebOSControlBase(object):
         control_base.test(callback=callback)
         event.wait()
 
-        assert response == [(False, "Error")]
+        assert response == [(False, "err")]
 
     def test_exec_command_failed_blocking(self):
         client = FakeClient()
@@ -139,13 +139,13 @@ class TestWebOSControlBase(object):
         control_base.COMMANDS = {
             "test": {
                 "uri": "/test",
-                "validation": lambda *args: False,
+                "validation": lambda *args: (False, "err"),
                 "validation_error": "Error"
             },
         }
 
         client.setup_response("/test", {"resp": True})
-        with raises(ValueError):
+        with raises(IOError):
             control_base.test(block=True)
 
     def test_exec_timeout(self):
@@ -263,7 +263,7 @@ class TestApplicationControl(object):
 
         client.setup_response("ssap://com.webos.applicationManager/listApps",
                               {"returnValue": False})
-        with raises(ValueError):
+        with raises(IOError):
             app.list_apps()
 
     def test_launch(self):
@@ -291,7 +291,7 @@ class TestApplicationControl(object):
 
         client.setup_response("ssap://system.launcher/launch",
                               {"returnValue": False})
-        with raises(ValueError):
+        with raises(IOError):
             app.launch(Application({"id": "123"}))
 
     def test_get_current(self):
