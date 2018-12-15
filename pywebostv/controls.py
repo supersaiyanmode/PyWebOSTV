@@ -223,7 +223,10 @@ class InputControl(WebOSControlBase):
         },
         "back": {
             "command": [["type", "button"], ["name", "BACK"]]
-        }
+        },
+        "ok": {
+            "command": [["type", "button"], ["name", "ENTER"]]
+        },
     }
 
     def __init__(self, *args, **kwargs):

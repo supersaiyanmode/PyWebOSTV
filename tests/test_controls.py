@@ -380,6 +380,7 @@ class TestInputControl(object):
             ("up", [], {}, "type button name UP"),
             ("home", [], {}, "type button name HOME"),
             ("back", [], {}, "type button name BACK"),
+            ("ok", [], {}, "type button name ENTER"),
         ])
     def test_input_commands(self, command, args, kwargs, data):
         client = FakeClient()
