@@ -396,3 +396,13 @@ class TestInputControl(object):
         split = data.split()
         expected = [x + ":" + y for x, y in zip(split[::2], split[1::2])]
         inp.mouse_ws.assert_sent_message("\n".join(expected) + "\n\n")
+
+    def test_bad_mouse_socket(self):
+        client = FakeClient()
+        inp = InputControl(client, ws_class=FakeMouseClient)
+
+        client.setup_response(
+            "ssap://com.webos.service.networkinput/getPointerInputSocket",
+            {"socketPath": ""})
+        with raises(IOError):
+            inp.connect_input()

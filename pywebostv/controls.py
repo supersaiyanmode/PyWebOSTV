@@ -245,7 +245,7 @@ class InputControl(WebOSControlBase):
         res = self.request(uri, None, block=True)
         sock_path = res.get("payload").get("socketPath")
         if not sock_path:
-            raise Exception("Unable to connect to mouse.")
+            raise IOError("Unable to connect to mouse.")
         self.mouse_ws = self.ws_class(sock_path)
         self.mouse_ws.connect()
 
