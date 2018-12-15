@@ -109,19 +109,19 @@ class TestWebOSClient(object):
             client.unsubscribe(uri)
 
     def test_new_registration(self):
-        client = WebOSClient("ws://a")
+        client = FakeClient()
         store = {}
         with raises(Exception, message="Timeout."):
             next(client.register(store, timeout=1))
 
-        assert 'client-key' not in self.sent_message
+        assert 'client-key' not in json.dumps(client.sent_message)
 
         store["client_key"] = "KEY!@#"
 
         with raises(Exception, message="Timeout."):
             next(client.register(store, timeout=1))
 
-        assert 'KEY!@#' in self.sent_message
+        assert 'KEY!@#' in json.dumps(client.sent_message)
 
     def test_discovery(self):
         def mock_discover(*args, **kwargs):
