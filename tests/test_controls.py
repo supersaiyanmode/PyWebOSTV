@@ -4,9 +4,11 @@ from pytest import raises, mark
 
 from pywebostv.controls import WebOSControlBase
 from pywebostv.controls import arguments, process_payload
-from pywebostv.controls import MediaControl
+from pywebostv.controls import MediaControl, SystemControl, ApplicationControl
+from pywebostv.controls import InputControl
+from pywebostv.model import Application
 
-from utils import FakeClient
+from utils import FakeClient, FakeMouseClient
 
 
 class TestArgumentExtraction(object):
@@ -215,3 +217,181 @@ class TestMediaControl(object):
         getattr(media, command)(block=False)
 
         client.assert_sent_message_without_id({"type": "request", "uri": uri})
+
+
+class TestSystemControl(object):
+    @mark.parametrize(
+        "command,uri",
+        [("info", "ssap://com.webos.service.update/getCurrentSWInformation"),
+         ("power_off", "ssap://system/turnOff")])
+    def test_commands(self, command, uri):
+        client = FakeClient()
+        system = SystemControl(client)
+        getattr(system, command)(block=False)
+
+        client.assert_sent_message_without_id({"type": "request", "uri": uri})
+
+    def test_notify(self):
+        client = FakeClient()
+        system = SystemControl(client)
+        system.notify("test", block=False)
+
+        client.assert_sent_message_without_id({
+            "type": "request",
+            "uri": "ssap://system.notifications/createToast",
+            "payload": {"message": "test"}
+        })
+
+
+class TestApplicationControl(object):
+    def test_list_apps(self):
+        client = FakeClient()
+        app = ApplicationControl(client)
+
+        appInfo = {"id": "1", "key": "value"}
+        fake_response = {
+            "returnValue": True,
+            "apps": [appInfo]
+        }
+        client.setup_response("ssap://com.webos.applicationManager/listApps",
+                              fake_response)
+        assert app.list_apps()[0].data == appInfo
+
+    def test_bad_list_apps(self):
+        client = FakeClient()
+        app = ApplicationControl(client)
+
+        client.setup_response("ssap://com.webos.applicationManager/listApps",
+                              {"returnValue": False})
+        with raises(ValueError):
+            app.list_apps()
+
+    def test_launch(self):
+        client = FakeClient()
+        app = ApplicationControl(client)
+
+        client.setup_response("ssap://system.launcher/launch",
+                              {"returnValue": True})
+        application = Application({"id": "123"})
+        app.launch(application, content_id="1", params={"a": "b"})
+
+        client.assert_sent_message_without_id({
+            "type": "request",
+            "uri": "ssap://system.launcher/launch",
+            "payload": {
+                "id": "123",
+                "contentId": "1",
+                "params": {"a": "b"}
+            }
+        })
+
+    def test_bad_launch(self):
+        client = FakeClient()
+        app = ApplicationControl(client)
+
+        client.setup_response("ssap://system.launcher/launch",
+                              {"returnValue": False})
+        with raises(ValueError):
+            app.launch(Application({"id": "123"}))
+
+    def test_get_current(self):
+        client = FakeClient()
+        app = ApplicationControl(client)
+
+        client.setup_response(
+            "ssap://com.webos.applicationManager/getForegroundAppInfo",
+            {"returnValue": True, "appId": "123"})
+        assert app.get_current() == "123"
+
+    def test_close(self):
+        client = FakeClient()
+        app = ApplicationControl(client)
+
+        client.setup_response("ssap://system.launcher/close",
+                              {"returnValue": True})
+        app.close({"123": "435"})
+
+        client.assert_sent_message_without_id({
+            "type": "request",
+            "uri": "ssap://system.launcher/close",
+            "payload": {
+                "123": "435",
+            }
+        })
+
+
+class TestInputControl(object):
+    def test_type(self):
+        client = FakeClient()
+        inp = InputControl(client)
+
+        inp.type("hello world", block=False)
+
+        client.assert_sent_message_without_id({
+            "type": "request",
+            "uri": "ssap://com.webos.service.ime/insertText",
+            "payload": {
+                "text": "hello world",
+                "replace": 0,
+            }
+        })
+
+    def test_delete(self):
+        client = FakeClient()
+        inp = InputControl(client)
+
+        inp.delete(4, block=False)
+
+        client.assert_sent_message_without_id({
+            "type": "request",
+            "uri": "ssap://com.webos.service.ime/deleteCharacters",
+            "payload": {
+                "count": 4,
+            }
+        })
+
+    def test_enter(self):
+        client = FakeClient()
+        inp = InputControl(client)
+
+        inp.enter(block=False)
+
+        client.assert_sent_message_without_id({
+            "type": "request",
+            "uri": "ssap://com.webos.service.ime/sendEnterKey",
+        })
+
+    def test_invalid_input_command(self):
+        client = FakeClient()
+        inp = InputControl(client)
+        with raises(AttributeError):
+            inp.invalid_command()
+
+    @mark.parametrize(
+        "command,args,kwargs,data",
+        [
+            ("move", [5, 6], {}, "type move dx 5 dy 6 down 0"),
+            ("move", [5, 6], {"drag": 1}, "type move dx 5 dy 6 down 1"),
+            ("click", [], {}, "type click"),
+            ("scroll", [5, 6], {}, "type scroll dx 5 dy 6"),
+            ("left", [], {}, "type button name LEFT"),
+            ("right", [], {}, "type button name RIGHT"),
+            ("down", [], {}, "type button name DOWN"),
+            ("up", [], {}, "type button name UP"),
+            ("home", [], {}, "type button name HOME"),
+            ("back", [], {}, "type button name BACK"),
+        ])
+    def test_input_commands(self, command, args, kwargs, data):
+        client = FakeClient()
+        inp = InputControl(client, ws_class=FakeMouseClient)
+
+        client.setup_response(
+            "ssap://com.webos.service.networkinput/getPointerInputSocket",
+            {"socketPath": "x"})
+        inp.connect_input()
+        getattr(inp, command)(*args, block=False, **kwargs)
+        inp.disconnect_input()
+
+        split = data.split()
+        expected = [x + ":" + y for x, y in zip(split[::2], split[1::2])]
+        inp.mouse_ws.assert_sent_message("\n".join(expected) + "\n\n")

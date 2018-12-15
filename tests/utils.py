@@ -5,10 +5,16 @@ from pywebostv.connection import WebOSClient
 
 
 class FakeClient(WebOSClient):
-    def __init__(self):
-        super(FakeClient, self).__init__("ws://test")
+    def __init__(self, url="ws://test"):
+        super(FakeClient, self).__init__(url)
         self.sent_message = None
         self.responses = {}
+
+    def connect(self):
+        pass
+
+    def close(Self):
+        pass
 
     def setup_response(self, uri, response):
         self.responses[uri] = {"payload": response}
@@ -32,3 +38,11 @@ class FakeClient(WebOSClient):
         sent = self.sent_message
         sent.pop("id")
         assert sent == obj
+
+
+class FakeMouseClient(FakeClient):
+    def send(self, obj):
+        self.sent_message = obj
+
+    def assert_sent_message(self, obj):
+        assert self.sent_message == obj

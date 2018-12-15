@@ -226,6 +226,10 @@ class InputControl(WebOSControlBase):
         }
     }
 
+    def __init__(self, *args, **kwargs):
+        self.ws_class = kwargs.pop('ws_class', WebOSWebSocketClient)
+        super(InputControl, self).__init__(*args, **kwargs)
+
     def __getattr__(self, name):
         if name in self.INPUT_COMMANDS:
             return self.exec_mouse_command(name, self.INPUT_COMMANDS[name])
@@ -239,7 +243,7 @@ class InputControl(WebOSControlBase):
         sock_path = res.get("payload").get("socketPath")
         if not sock_path:
             raise Exception("Unable to connect to mouse.")
-        self.mouse_ws = WebOSWebSocketClient(sock_path)
+        self.mouse_ws = self.ws_class(sock_path)
         self.mouse_ws.connect()
 
     def disconnect_input(self):
