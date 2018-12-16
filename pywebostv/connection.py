@@ -168,15 +168,14 @@ class WebOSClient(WebOSWebSocketClient):
         if get_queue:
             return wait_queue
 
-    def subscribe(self, uri, callback, payload=None):
+    def subscribe(self, uri, unique_id, callback, payload=None):
         def func(obj):
             callback(obj.get("payload"))
 
-        unique_id = str(uuid4())
-        self.send_message('subscribe', uri, payload, unique_id=unique_id,
-                          callback=func, cur_time=lambda: None)
         with self.subscriber_lock:
             self.subscribers[unique_id] = uri
+        self.send_message('subscribe', uri, payload, unique_id=unique_id,
+                          callback=func, cur_time=lambda: None)
         return unique_id
 
     def unsubscribe(self, unique_id):

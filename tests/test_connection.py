@@ -90,23 +90,24 @@ class TestWebOSClient(object):
             result_event.set()
 
         client = FakeClient()
-        uri = client.subscribe('unique_uri', callback)
+        uid = "123"
+        client.subscribe('unique_uri', "123", callback)
 
-        client.received_message(json.dumps({"id": uri, "payload": [1]}))
-        client.received_message(json.dumps({"id": uri, "payload": [2]}))
-        client.received_message(json.dumps({"id": uri, "payload": [3]}))
+        client.received_message(json.dumps({"id": "123", "payload": [1]}))
+        client.received_message(json.dumps({"id": "123", "payload": [2]}))
+        client.received_message(json.dumps({"id": "123", "payload": [3]}))
 
         result_event.wait()
         assert result == [[1], [2], [3]]
 
         result = []
-        client.unsubscribe(uri)
+        client.unsubscribe("123")
 
-        client.received_message(json.dumps({"id": uri, "payload": [1]}))
+        client.received_message(json.dumps({"id": "123", "payload": [1]}))
         assert result == []
 
         with raises(ValueError):
-            client.unsubscribe(uri)
+            client.unsubscribe("123")
 
     def test_new_registration(self):
         client = FakeClient()

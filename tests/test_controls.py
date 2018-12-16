@@ -1,4 +1,4 @@
-from threading import Event
+from threading import Event, Semaphore
 
 from pytest import raises, mark
 
@@ -160,6 +160,92 @@ class TestWebOSControlBase(object):
         client.setup_response("/another-uri", {"resp": True})
         with raises(Exception):
             control_base.test(timeout=1)
+
+    def test_subscribe(self):
+        client = FakeClient()
+        control_base = WebOSControlBase(client)
+        control_base.COMMANDS = {
+            "test": {
+                "uri": "/test",
+                "subscription": True,
+                "validation": lambda p: (p == {"a": 1}, "Error.")
+            },
+        }
+
+        resp = []
+        sem = Semaphore(0)
+
+        def callback(status, payload):
+            resp.append((status, payload))
+            sem.release()
+
+        client.setup_subscribe_response("/test", [{"a": 1}, {"a": 2}])
+        control_base.subscribe_test(callback)
+        assert sem.acquire(timeout=2)
+        assert sem.acquire(timeout=2)
+
+        assert resp == [(True, {"a": 1}), (False, "Error.")]
+
+        with raises(ValueError):
+            control_base.subscribe_test(None)
+
+    def test_subscription_not_found(self):
+        client = FakeClient()
+        control_base = WebOSControlBase(client)
+        control_base.COMMANDS = {
+            "test": {
+                "uri": "/test",
+                "subscription": True
+            },
+        }
+
+        with raises(AttributeError):
+            control_base.subscribe_something(None)
+
+        with raises(AttributeError):
+            control_base.unsubscribe_something()
+
+    def test_subscription_not_allowed(self):
+        client = FakeClient()
+        control_base = WebOSControlBase(client)
+        control_base.COMMANDS = {
+            "test": {
+                "uri": "/test",
+            },
+        }
+        with raises(AttributeError):
+            control_base.subscribe_test(None)
+
+        with raises(AttributeError):
+            control_base.unsubscribe_test()
+
+    def test_unsubscribe(self):
+        client = FakeClient()
+        control_base = WebOSControlBase(client)
+        control_base.COMMANDS = {
+            "test": {
+                "uri": "/test",
+                "subscription": True
+            },
+        }
+
+        resp = []
+        sem = Semaphore(0)
+
+        def callback(status, payload):
+            resp.append((status, payload))
+            control_base.unsubscribe_test()
+            sem.release()
+
+        client.setup_subscribe_response("/test", [{"a": 1}, {"a": 2}])
+        control_base.subscribe_test(callback)
+        assert sem.acquire(timeout=5)
+        assert not sem.acquire(timeout=2)
+
+        assert resp == [(True, {"a": 1})]
+
+        with raises(ValueError):
+            control_base.unsubscribe_test()
 
 
 class TestMediaControl(object):

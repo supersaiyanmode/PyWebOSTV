@@ -1,5 +1,6 @@
 from collections import Callable
 from queue import Empty
+from uuid import uuid4
 
 from pywebostv.connection import WebOSWebSocketClient
 from pywebostv.model import Application, InputSource
@@ -50,6 +51,7 @@ class WebOSControlBase(object):
 
     def __init__(self, client):
         self.client = client
+        self.subscriptions = {}
 
     def request(self, uri, params, callback=None, block=False, timeout=60):
         if block:
@@ -63,9 +65,30 @@ class WebOSControlBase(object):
             self.client.send_message('request', uri, params, callback=callback)
 
     def __getattr__(self, name):
+        subscribe_prefix = "subscribe_"
+        unsubscribe_prefix = "unsubscribe_"
         if name in self.COMMANDS:
             return self.exec_command(name, self.COMMANDS[name])
-        raise AttributeError(name)
+        elif name.startswith(subscribe_prefix):
+            subscribe_name = name.lstrip(subscribe_prefix)
+            sub_cmd_info = self.COMMANDS.get(subscribe_name)
+            if not sub_cmd_info:
+                raise AttributeError(name)
+            elif not sub_cmd_info.get("subscription"):
+                raise AttributeError("Subscription not found or allowed.")
+            else:
+                return self.subscribe(subscribe_name, sub_cmd_info)
+        elif name.startswith(unsubscribe_prefix):
+            unsubscribe_name = name.lstrip(unsubscribe_prefix)
+            sub_cmd_info = self.COMMANDS.get(unsubscribe_name)
+            if not sub_cmd_info:
+                raise AttributeError(name)
+            elif not sub_cmd_info.get("subscription"):
+                raise AttributeError("Subscription not found or allowed.")
+            else:
+                return self.unsubscribe(unsubscribe_name, sub_cmd_info)
+        else:
+            raise AttributeError(name)
 
     def exec_command(self, cmd, cmd_info):
         def request_func(*args, **kwargs):
@@ -100,6 +123,34 @@ class WebOSControlBase(object):
                 self.request(cmd_info["uri"], params)
         return request_func
 
+    def subscribe(self, name, cmd_info):
+        def request_func(callback):
+            response_valid = cmd_info.get("validation", lambda p: (True, None))
+            return_fn = cmd_info.get('return', lambda x: x)
+
+            def callback_wrapper(payload):
+                status, message = response_valid(payload)
+                if not status:
+                    return callback(False, message)
+                return callback(True, return_fn(payload))
+
+            if name in self.subscriptions:
+                raise ValueError("Already subscribed.")
+
+            uid = str(uuid4())
+            self.subscriptions[name] = uid
+            self.client.subscribe(cmd_info["uri"], uid, callback_wrapper)
+        return request_func
+
+    def unsubscribe(self, name, cmd_info):
+        def request_func():
+            uid = self.subscriptions.get(name)
+            if not uid:
+                raise ValueError("Not subscribed.")
+            self.client.unsubscribe(uid)
+            del self.subscriptions[name]
+        return request_func
+
 
 class MediaControl(WebOSControlBase):
     COMMANDS = {
@@ -108,6 +159,7 @@ class MediaControl(WebOSControlBase):
         "get_volume": {
             "uri": "ssap://audio/getVolume",
             "validation": standard_validation,
+            "subscription": True,
         },
         "set_volume": {
             "uri": "ssap://audio/setVolume",
@@ -169,6 +221,7 @@ class ApplicationControl(WebOSControlBase):
             "payload": {},
             "validity": lambda p: p.pop("returnValue"),
             "return": lambda p: p["appId"],
+            "subscription": True,
         },
         "close": {
             "uri": "ssap://system.launcher/close",
