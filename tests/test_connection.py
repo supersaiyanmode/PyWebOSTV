@@ -90,7 +90,6 @@ class TestWebOSClient(object):
             result_event.set()
 
         client = FakeClient()
-        uid = "123"
         client.subscribe('unique_uri', "123", callback)
 
         client.received_message(json.dumps({"id": "123", "payload": [1]}))

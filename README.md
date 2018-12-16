@@ -7,14 +7,14 @@ I looked at a few libraries. The LGWebOSRemote repository by
 [klattimer](https://github.com/klattimer/LGWebOSRemote) is definitely a good library, but it has a few problems:
  - Meant to be used with Python 2.x.
  - Assumes all the users of the library would like to save the credentials to ~/.lgtv.json.
- - Assumes only a single command will be fired and waited on at any given time (ctrl+F for self.__waiting_callback)
+ - Assumes only a single command will be fired and waited on at any given time (ctrl+F for `self.__waiting_callback`)
  - Mouse/Keyboard not supported.
 
 This SDK is a tiny attempt at overcoming some of the above problems.
 
 
 ### Current status?
-At the moment, I haven't been able to do any kind of extensive testing. No unit test cases too! Current status: Works for me! :)
+~~At the moment, I haven't been able to do any kind of extensive testing. No unit test cases too!~~ Current status: Works for quite a few people! :)
 
 Currently working on more controls and unit test cases. Upon testing, I will upload it to PyPI.
 
@@ -101,11 +101,20 @@ inp.delete(10)  # Backspace 10 chars
 inp.disconnect_input()
 ```
 
+#### TV Controls
+
+```
+tv_control = TvControl()
+tv_control.channel_down()
+tv_control.channel_up()
+```
+
 #### Source Controls
 
 ```
-sources = SourceControl(client)
-sources.set_source(list[0])
+source_control = SourceControl(client)
+sources = source_control.list_sources()
+source_control.set_source(sources[0])
 ```
 
 More controls coming soon!

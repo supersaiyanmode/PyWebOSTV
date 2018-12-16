@@ -179,11 +179,19 @@ class MediaControl(WebOSControlBase):
      }
 
 
+class TvControl(WebOSControlBase):
+    COMMANDS = {
+        "channel_down": {"uri": "ssap://tv/channelDown"},
+        "channel_up": {"uri": "ssap://tv/channelUp"},
+     }
+
+
 class SystemControl(WebOSControlBase):
     COMMANDS = {
         "power_off": {"uri": "ssap://system/turnOff"},
         "info": {
-            "uri": "ssap://com.webos.service.update/getCurrentSWInformation"
+            "uri": "ssap://com.webos.service.update/getCurrentSWInformation",
+            "validation": standard_validation,
         },
         "notify": {
             "uri": "ssap://system.notifications/createToast",
@@ -283,6 +291,12 @@ class InputControl(WebOSControlBase):
         },
         "ok": {
             "command": [["type", "button"], ["name", "ENTER"]]
+        },
+        "dash": {
+            "command": [["type", "button"], ["name", "DASH"]]
+        },
+        "info": {
+            "command": [["type", "button"], ["name", "INFO"]]
         },
     }
 
