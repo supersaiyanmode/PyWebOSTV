@@ -173,16 +173,17 @@ class TestWebOSControlBase(object):
         }
 
         resp = []
-        sem = Semaphore(0)
+        e1, e2 = Event(), Event()
+        events = [e1, e2]
 
         def callback(status, payload):
             resp.append((status, payload))
-            sem.release()
+            events.pop(0).set()
 
         client.setup_subscribe_response("/test", [{"a": 1}, {"a": 2}])
         control_base.subscribe_test(callback)
-        assert sem.acquire(timeout=2)
-        assert sem.acquire(timeout=2)
+        assert e1.wait(timeout=2)
+        assert e2.wait(timeout=2)
 
         assert resp == [(True, {"a": 1}), (False, "Error.")]
 
@@ -230,17 +231,18 @@ class TestWebOSControlBase(object):
         }
 
         resp = []
-        sem = Semaphore(0)
+        e1, e2 = Event(), Event()
+        events = [e1, e2]
 
         def callback(status, payload):
             resp.append((status, payload))
             control_base.unsubscribe_test()
-            sem.release()
+            events.pop(0).set()
 
         client.setup_subscribe_response("/test", [{"a": 1}, {"a": 2}])
         control_base.subscribe_test(callback)
-        assert sem.acquire(timeout=5)
-        assert not sem.acquire(timeout=2)
+        assert e1.wait(timeout=5)
+        assert not e2.wait(timeout=5)
 
         assert resp == [(True, {"a": 1})]
 
