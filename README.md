@@ -25,7 +25,7 @@ Currently working on more controls~~and unit test cases~~. I will soon upload it
 ### How to Use: Connecting to the TV
 
 #### Establishing the connection.
-```
+```python
 from pywebostv.discovery import *    # Because I'm lazy, don't do this.
 from pywebostv.connection import *
 from pywebostv.controls import *
@@ -68,7 +68,7 @@ Things to note:
 
 The general pattern is:
 
-```
+```python
 control = SomeControl(client)
 
 # Blocking call
@@ -109,7 +109,7 @@ calls, refer to the section above.
 
 #### Media Controls
 
-```
+```python
 media = MediaControl(client)
 media.volume_up()          # Increase the volume by 1 unit. Doesn't return anything
 media.volume_down()        # Decrease the volume by 1 unit. Doesn't return anything
@@ -127,7 +127,7 @@ media.fast_forward()
 ##### Subscriptions
 `get_volume` supports subscription. To subscribe to volume changes, say something like:
 
-```
+```python
 def on_volume_change(status, payload):
     if status:
         print(payload)
@@ -139,7 +139,7 @@ media.subscribe_get_volume(on_volume_change)  # on_volume_change(..) will now be
 ```
 #### System Controls
 
-```
+```python
 system = SystemControl(client)
 system.notify("This is a notification message!")  # Show a notification message on the TV.
 system.power_off()                                # Turns off the TV. There is no way to turn it
@@ -152,7 +152,7 @@ system.info()                                     # Returns a dict with keys suc
 
 #### Application Controls
 
-```
+```python
 app = ApplicationControl(client)
 apps = app.list_apps()                            # Returns a list of `Application` instances.
 
@@ -180,7 +180,7 @@ the same way as `.subscribe_get_volume(..)` above.
 
 #### Mouse and Button Controls
 
-```
+```python
 inp = InputControl(client)
 
 inp.type("This sends keyboard input!")            # This sends keystrokes, but needs the keyboard to
@@ -194,7 +194,7 @@ requires that we open a different connection and uses a different message struct
 `inp.connect_input()` to create this connection and `inp.disconnect_input()` to close it. All the
 APIs below should be called between connect and disconnect.
 
-```
+```python
 inp.connect_input()
 inp.move(10, 10)    # Moves mouse
 inp.click()         # Click where the mouse pointer is. It sometimes also acts as the center "OK"
@@ -212,7 +212,7 @@ inp.disconnect_input()
 
 #### TV Controls
 
-```
+```python
 tv_control = TvControl()
 tv_control.channel_down()
 tv_control.channel_up()
@@ -220,7 +220,7 @@ tv_control.channel_up()
 
 #### Source Controls
 
-```
+```python
 source_control = SourceControl(client)
 sources = source_control.list_sources()    # Returns a list of InputSource instances.
 source_control.set_source(sources[0])      # .set_source(..) accepts an InputSource instance.
