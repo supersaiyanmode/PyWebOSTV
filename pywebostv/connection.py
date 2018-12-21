@@ -2,9 +2,12 @@
 
 import json
 import time
-from queue import Queue, Empty
 from threading import RLock
 from uuid import uuid4
+try:
+    from queue import Queue, Empty
+except ImportError:
+    from Queue import Queue, Empty
 
 from ws4py.client.threadedclient import WebSocketClient
 
@@ -122,8 +125,8 @@ class WebOSClient(WebOSWebSocketClient):
         if "client_key" in store:
             REGISTRATION_PAYLOAD["client-key"] = store["client_key"]
 
-        queue = self.send('register', None, REGISTRATION_PAYLOAD,
-                          get_queue=True)
+        queue = self.send_message('register', None, REGISTRATION_PAYLOAD,
+                                  get_queue=True)
         while True:
             try:
                 item = queue.get(block=True, timeout=timeout)
@@ -140,8 +143,8 @@ class WebOSClient(WebOSWebSocketClient):
                 # TODO: Better exception.
                 raise Exception("Failed to register.")
 
-    def send(self, request_type, uri, payload, unique_id=None, get_queue=False,
-             callback=None, cur_time=time.time):
+    def send_message(self, request_type, uri, payload, unique_id=None,
+                     get_queue=False, callback=None, cur_time=time.time):
         if unique_id is None:
             unique_id = str(uuid4())
 
@@ -160,20 +163,19 @@ class WebOSClient(WebOSWebSocketClient):
             obj["payload"] = payload
 
         with self.send_lock:
-            super(WebOSClient, self).send(json.dumps(obj))
+            self.send(json.dumps(obj))
 
         if get_queue:
             return wait_queue
 
-    def subscribe(self, uri, callback, payload=None):
+    def subscribe(self, uri, unique_id, callback, payload=None):
         def func(obj):
             callback(obj.get("payload"))
 
-        unique_id = str(uuid4())
-        self.send('subscribe', uri, payload, unique_id=unique_id,
-                  callback=func, cur_time=lambda: None)
         with self.subscriber_lock:
             self.subscribers[unique_id] = uri
+        self.send_message('subscribe', uri, payload, unique_id=unique_id,
+                          callback=func, cur_time=lambda: None)
         return unique_id
 
     def unsubscribe(self, unique_id):
@@ -186,7 +188,7 @@ class WebOSClient(WebOSWebSocketClient):
         with self.waiter_lock:
             self.waiters.pop(unique_id)
 
-        self.send('unsubscribe', uri, payload=None)
+        self.send_message('unsubscribe', uri, payload=None)
 
     def received_message(self, msg):
         obj = json.loads(str(msg))
