@@ -41,7 +41,7 @@ def process_payload(obj, *args, **kwargs):
 
 
 def standard_validation(payload):
-    if not payload.pop("returnValue"):
+    if not payload.pop("returnValue", None):
         return False, payload.pop("errorText", "Unknown error.")
     return True, None
 
