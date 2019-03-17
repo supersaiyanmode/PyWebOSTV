@@ -1,30 +1,32 @@
 # PyWebOSTV
+
 [![Build Status](https://api.travis-ci.org/supersaiyanmode/PyWebOSTV.svg?branch=develop)](https://travis-ci.org/supersaiyanmode/PyWebOSTV)
 [![Coverage Status](https://coveralls.io/repos/github/supersaiyanmode/PyWebOSTV/badge.svg?branch=master)](https://coveralls.io/github/supersaiyanmode/PyWebOSTV?branch=master)
 
-### Why another Library?
+## Why another Library?
+
 I looked at a few libraries. The LGWebOSRemote repository by
 [klattimer](https://github.com/klattimer/LGWebOSRemote) is definitely a good library, but it has a
 few problems:
- - Meant to be used with Python 2.x.
- - Assumes all the users of the library would like to save the credentials to ~/.lgtv.json.
- - Assumes only a single command will be fired and waited on at any given time
-   (ctrl+F for `self.__waiting_callback`)
- - Mouse/Keyboard not supported.
+
+- Meant to be used with Python 2.x.
+- Assumes all the users of the library would like to save the credentials to ~/.lgtv.json.
+- Assumes only a single command will be fired and waited on at any given time (ctrl+F for `self.__waiting_callback`)
+- Mouse/Keyboard not supported.
 
 This SDK is a tiny attempt at overcoming some of the above problems.
 
+## Current status?
 
-### Current status?
 ~~At the moment, I haven't been able to do any kind of extensive testing. No unit test cases too!~~
 Current status: Works for quite a few people! :)
 
 Currently working on more controls~~and unit test cases~~. I will soon upload it to PyPI.
 
+## How to Use: Connecting to the TV
 
-### How to Use: Connecting to the TV
+### Establishing the connection.
 
-#### Establishing the connection.
 ```python
 from pywebostv.discovery import *    # Because I'm lazy, don't do this.
 from pywebostv.connection import *
@@ -47,21 +49,23 @@ for status in client.register(store):
         print("Registration successful!")
 ```
 
-#### Using the connection to call APIs
+### Using the connection to call APIs
+
 The `client` instance represents the main channel of communication with the TV. All `*Control`
 instances (`MediaControl`, `ApplicationControl` etc) share the same underlying connection. All
 available APIs are grouped into separate classes (for cleanliness) like `MediaControl`,
-`SystemControl` etc. 
+`SystemControl` etc.
 
 Most `*Control` classes behave in a very similar way and are super extensible. This is because most
 of the heavy lifting is done in the base class -- incorporating a new API that isn't currently
 supported by this library should be very easy. Read the extension section for more on this.
 
 Things to note:
- - Most APIs support `block=` argument. If `True` the call blocks for the response to arrive. If
+
+- Most APIs support `block=` argument. If `True` the call blocks for the response to arrive. If
    `False`, it is a good idea to provide a `callback=` argument. If you don't care about the
    response at all, simply call the API with `block=False`.
- - Some APIs support subscribing for changes. Provide a callback and you will be notified when the
+- Some APIs support subscribing for changes. Provide a callback and you will be notified when the
    event happens. It is an error to subscribe more than once on the same underlying connection. To
    subscribe, the function you'd call is `control.subscribe_api_name()` assuming the regular API is
    called `api_name`. To unsubscribe, just call: `control.unsubscribe_api_name()`.
@@ -101,13 +105,14 @@ control.subscribe_api(my_function).
 control.unsubscribe_api()  # After this point, you can resubscribe.
 
 ```
-#### API Details
+
+### API Details
 
 Please note that all the examples below use the blocking calls. Their return values and structure
 are documented in the comments. They throw python exceptions when unsuccessful. To make non-blocking
 calls, refer to the section above.
 
-#### Media Controls
+### Media Controls
 
 ```python
 media = MediaControl(client)
@@ -124,7 +129,8 @@ media.rewind()
 media.fast_forward()
 ```
 
-##### Subscriptions
+#### Subscriptions
+
 `get_volume` supports subscription. To subscribe to volume changes, say something like:
 
 ```python
@@ -137,7 +143,8 @@ def on_volume_change(status, payload):
 media.subscribe_get_volume(on_volume_change)  # on_volume_change(..) will now be called when the
                                               # volume/mute status etc changes.
 ```
-#### System Controls
+
+### System Controls
 
 ```python
 system = SystemControl(client)
@@ -150,7 +157,7 @@ system.info()                                     # Returns a dict with keys suc
                                                   # model_name, # major_ver, minor_ver etc.
 ```
 
-#### Application Controls
+### Application Controls
 
 ```python
 app = ApplicationControl(client)
@@ -174,11 +181,12 @@ foreground_app = [x for x in apps if app_id == x["id"]][0]
 icon_url = foreground_app["icon"]                 # This returns an HTTP URL hosted by the TV.
 ```
 
-##### Subscription
+#### Subscription
+
 `.get_current()` supports subscription. To subscribe, call `app.subscribe_get_current(callback)` in
 the same way as `.subscribe_get_volume(..)` above.
 
-#### Mouse and Button Controls
+### Mouse and Button Controls
 
 ```python
 inp = InputControl(client)
@@ -231,7 +239,7 @@ inp.channel_down()
 inp.disconnect_input()
 ```
 
-#### TV Controls
+### TV Controls
 
 ```python
 tv_control = TvControl()
@@ -239,7 +247,7 @@ tv_control.channel_down()
 tv_control.channel_up()
 ```
 
-#### Source Controls
+### Source Controls
 
 ```python
 source_control = SourceControl(client)
@@ -252,12 +260,11 @@ source_control.set_source(sources[0])      # .set_source(..) accepts an InputSou
 
 More controls coming soon!
 
+## Credits
 
-# Credits
- - [klattimer](https://github.com/klattimer/LGWebOSRemote) for his library! Since WebOS team decided
+- [klattimer](https://github.com/klattimer/LGWebOSRemote) for his library! Since WebOS team decided
    against providing any sort of documentation, his repository was extremely useful for an initial
    implementation
- - As far as input controls are concerned, they are based on the Java package written by
+- As far as input controls are concerned, they are based on the Java package written by
    [Connect-SDK folks](https://github.com/ConnectSDK/Connect-SDK-Android-Core/tree/master/src/com/connectsdk/service/webos)!
- - All individual contributors to this repository.
-
+- All individual contributors to this repository.
