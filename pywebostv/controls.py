@@ -298,6 +298,69 @@ class InputControl(WebOSControlBase):
         "info": {
             "command": [["type", "button"], ["name", "INFO"]]
         },
+        "one": {
+            "command": [["type", "button"], ["name", "1"]]
+        },
+        "two": {
+            "command": [["type", "button"], ["name", "2"]]
+        },
+        "three": {
+            "command": [["type", "button"], ["name", "3"]]
+        },
+        "four": {
+            "command": [["type", "button"], ["name", "4"]]
+        },
+        "five": {
+            "command": [["type", "button"], ["name", "5"]]
+        },
+        "six": {
+            "command": [["type", "button"], ["name", "6"]]
+        },
+        "seven": {
+            "command": [["type", "button"], ["name", "7"]]
+        },
+        "eight": {
+            "command": [["type", "button"], ["name", "8"]]
+        },
+        "nine": {
+            "command": [["type", "button"], ["name", "9"]]
+        },
+        "zero": {
+            "command": [["type", "button"], ["name", "0"]]
+        },
+        "asterisk": {
+            "command": [["type", "button"], ["name", "ASTERISK"]]
+        },
+        "cc": {
+            "command": [["type", "button"], ["name", "CC"]]
+        },
+        "exit": {
+            "command": [["type", "button"], ["name", "EXIT"]]
+        },
+        "mute": {
+            "command": [["type", "button"], ["name", "MUTE"]]
+        },
+        "red": {
+            "command": [["type", "button"], ["name", "RED"]]
+        },
+        "green": {
+            "command": [["type", "button"], ["name", "GREEN"]]
+        },
+        "blue": {
+            "command": [["type", "button"], ["name", "BLUE"]]
+        },
+        "volume_up": {
+            "command": [["type", "button"], ["name", "VOLUMEUP"]]
+        },
+        "volume_down": {
+            "command": [["type", "button"], ["name", "VOLUMEDOWN"]]
+        },
+        "channel_up": {
+            "command": [["type", "button"], ["name", "CHANNELUP"]]
+        },
+        "channel_down": {
+            "command": [["type", "button"], ["name", "CHANNELDOWN"]]
+        },
     }
 
     def __init__(self, *args, **kwargs):
