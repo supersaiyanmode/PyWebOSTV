@@ -1,3 +1,5 @@
+wakeonlan
+getmac
 requests[security]
 future
 ws4py==0.4.2

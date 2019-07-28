@@ -2,6 +2,9 @@ from collections import Callable
 from queue import Empty
 from uuid import uuid4
 
+from getmac import get_mac_address
+from wakeonlan import send_magic_packet
+
 from pywebostv.connection import WebOSWebSocketClient
 from pywebostv.model import Application, InputSource
 
@@ -199,6 +202,10 @@ class SystemControl(WebOSControlBase):
             "payload": {"message": arguments(0)}
         }
     }
+
+    def power_on(self):
+        host = self.client.host
+        send_magic_packet(get_mac_address(ip=host))
 
 
 class ApplicationControl(WebOSControlBase):

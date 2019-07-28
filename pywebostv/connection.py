@@ -114,6 +114,7 @@ class WebOSClient(WebOSWebSocketClient):
         self.subscribers = {}
         self.subscriber_lock = RLock()
         self.send_lock = RLock()
+        self.host = host
 
     @staticmethod
     def discover():
