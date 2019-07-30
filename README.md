@@ -207,6 +207,27 @@ inp.home()
 inp.back()
 inp.dash()
 inp.info()
+inp.num_1()         # Number keys...
+inp.num_2()
+inp.num_3()
+inp.num_4()
+inp.num_5()
+inp.num_6()
+inp.num_7()
+inp.num_8()
+inp.num_9()
+inp.num_0()
+inp.asterisk()      # Literally just an "*"
+inp.cc()            # Closed captioning
+inp.exit()          
+inp.red()           # Colored buttons
+inp.green()
+inp.blue()
+inp.mute()          # The remaining commands are also available in either MediaControl or TvControl
+inp.volume_up()
+inp.volume_down()
+inp.channel_up()
+inp.channel_down()
 inp.disconnect_input()
 ```
 
