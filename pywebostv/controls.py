@@ -298,34 +298,34 @@ class InputControl(WebOSControlBase):
         "info": {
             "command": [["type", "button"], ["name", "INFO"]]
         },
-        "one": {
+        "num_1": {
             "command": [["type", "button"], ["name", "1"]]
         },
-        "two": {
+        "num_2": {
             "command": [["type", "button"], ["name", "2"]]
         },
-        "three": {
+        "num_3": {
             "command": [["type", "button"], ["name", "3"]]
         },
-        "four": {
+        "num_4": {
             "command": [["type", "button"], ["name", "4"]]
         },
-        "five": {
+        "num_5": {
             "command": [["type", "button"], ["name", "5"]]
         },
-        "six": {
+        "num_6": {
             "command": [["type", "button"], ["name", "6"]]
         },
-        "seven": {
+        "num_7": {
             "command": [["type", "button"], ["name", "7"]]
         },
-        "eight": {
+        "num_8": {
             "command": [["type", "button"], ["name", "8"]]
         },
-        "nine": {
+        "num_9": {
             "command": [["type", "button"], ["name", "9"]]
         },
-        "zero": {
+        "num_0": {
             "command": [["type", "button"], ["name", "0"]]
         },
         "asterisk": {
