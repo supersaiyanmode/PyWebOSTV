@@ -247,8 +247,8 @@ tv_control.channel_down()
 tv_control.channel_up()
 tv_control.channel_list() # Example output below
 tv_control.get_current_channel()
-tv_control.set_channel_with_id(channelId) # channelID can be found in channel_list() or get_current_channel()
-tv_control.set_channel_with_number(channelNumber) # Maybe doesn't work, use with_id variation and programatically you can map 
+tv_control.set_channel_with_id(channelId) # channelId can be found in channel_list() or get_current_channel()
+tv_control.set_channel_with_number(channelNumber) # Maybe doesn't work, use with_id variation and programatically you can map numbers to channelId
 ```
 
 #### channel_list() output
