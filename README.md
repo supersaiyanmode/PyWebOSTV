@@ -207,6 +207,7 @@ inp.connect_input()
 inp.move(10, 10)    # Moves mouse
 inp.click()         # Click where the mouse pointer is. It sometimes also acts as the center "OK"
                     # button on the remote.
+inp.ok()
 inp.up()
 inp.down()
 inp.left()
