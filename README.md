@@ -230,6 +230,7 @@ inp.cc()            # Closed captioning
 inp.exit()          
 inp.red()           # Colored buttons
 inp.green()
+inp.yellow()
 inp.blue()
 inp.mute()          # The remaining commands are also available in either MediaControl or TvControl
 inp.volume_up()

@@ -366,6 +366,9 @@ class InputControl(WebOSControlBase):
         "green": {
             "command": [["type", "button"], ["name", "GREEN"]]
         },
+        "yellow": {
+            "command": [["type", "button"], ["name", "YELLOW"]]
+        },
         "blue": {
             "command": [["type", "button"], ["name", "BLUE"]]
         },
