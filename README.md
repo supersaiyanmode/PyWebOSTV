@@ -242,9 +242,65 @@ inp.disconnect_input()
 ### TV Controls
 
 ```python
-tv_control = TvControl()
+tv_control = TvControl(client)
 tv_control.channel_down()
 tv_control.channel_up()
+tv_control.channel_list() # Example output below
+tv_control.get_current_channel()
+tv_control.set_channel_with_id(channelId) # channelID can be found in channel_list() or get_current_channel()
+tv_control.set_channel_with_number(channelNumber) # Maybe doesn't work, use with_id variation and programatically you can map 
+```
+
+#### channel_list() output
+```
+{
+    "scannedChannelCount": {
+        "terrestrialAnalogCount": 0,
+        "cableDigitalCount": 0,
+        "cableAnalogCount": 0,
+        "terrestrialDigitalCount": 87,
+        "satelliteDigitalCount": 230
+    },
+    "returnValue": true,
+    "dataType": 2,
+    "channelList": [
+        {
+            ...
+            "channelId": "1_31_1_0_1008_494_8916",
+            ...
+            "channelType": "Terrestrial Digital TV",
+            ...
+            "channelName": "La 1 HD",
+            ...
+            "channelMode": "Terrestrial",
+            ...
+            "channelNumber": "1",
+            ...
+        },
+        {...},
+        {
+            ...
+            "channelId": "7_45_150_150_1046_30505_1",
+            ...
+            "channelType": "Satellite Digital TV",
+            ...
+            "channelName": "CANAL SUR A.",
+            ...
+            "channelMode": "Satellite",
+            ...
+            "channelNumber": "150",
+            ...
+        },
+        {...}
+    ]
+    "channelLogoServerUrl": "http://...",
+    "cableAnalogSkipped": false,
+    "dataSource": 1,
+    "valueList": "some string"
+    "channelListCount": 317,
+    "deviceSourceIndex": 1
+}
+
 ```
 
 ### Source Controls
