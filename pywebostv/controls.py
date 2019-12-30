@@ -384,6 +384,21 @@ class InputControl(WebOSControlBase):
         "channel_down": {
             "command": [["type", "button"], ["name", "CHANNELDOWN"]]
         },
+        "play": {
+            "command": [["type", "button"], ["name", "PLAY"]]
+        },
+        "pause": {
+            "command": [["type", "button"], ["name", "PAUSE"]]
+        },
+        "stop": {
+            "command": [["type", "button"], ["name", "STOP"]]
+        },
+        "rewind": {
+            "command": [["type", "button"], ["name", "REWIND"]]
+        },
+        "fastforward": {
+            "command": [["type", "button"], ["name", "FASTFORWARD"]]
+        }
     }
 
     def __init__(self, *args, **kwargs):
