@@ -183,13 +183,6 @@ class TvControl(WebOSControlBase):
     COMMANDS = {
         "channel_down": {"uri": "ssap://tv/channelDown"},
         "channel_up": {"uri": "ssap://tv/channelUp"},
-        "set_channel_with_number": {
-            "uri": "ssap://tv/openChannel",
-            "args": [int],
-            "payload": {
-                "channelNumber": arguments(0)
-            }
-        },
         "set_channel_with_id": {
             "uri": "ssap://tv/openChannel",
             "args": [str],
