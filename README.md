@@ -214,7 +214,7 @@ inp.left()
 inp.right()
 inp.home()
 inp.back()
-inp.dash()
+inp.dash()          # The right side menu that appears with Live button
 inp.info()
 inp.num_1()         # Number keys...
 inp.num_2()
@@ -238,6 +238,12 @@ inp.volume_up()
 inp.volume_down()
 inp.channel_up()
 inp.channel_down()
+inp.play()
+inp.pause()
+inp.stop()
+inp.fastforward()
+inp.rewind()
+
 inp.disconnect_input()
 ```
 
@@ -247,62 +253,10 @@ inp.disconnect_input()
 tv_control = TvControl(client)
 tv_control.channel_down()
 tv_control.channel_up()
-tv_control.channel_list() # Example output below
+tv_control.channel_list()
 tv_control.get_current_channel()
-tv_control.set_channel_with_id(channelId) # channelId can be found in channel_list() or get_current_channel()
-tv_control.set_channel_with_number(channelNumber) # Maybe doesn't work, use with_id variation and programatically you can map numbers to channelId
-```
-
-#### channel_list() output
-```
-{
-    "scannedChannelCount": {
-        "terrestrialAnalogCount": 0,
-        "cableDigitalCount": 0,
-        "cableAnalogCount": 0,
-        "terrestrialDigitalCount": 87,
-        "satelliteDigitalCount": 230
-    },
-    "returnValue": true,
-    "dataType": 2,
-    "channelList": [
-        {
-            ...
-            "channelId": "1_31_1_0_1008_494_8916",
-            ...
-            "channelType": "Terrestrial Digital TV",
-            ...
-            "channelName": "La 1 HD",
-            ...
-            "channelMode": "Terrestrial",
-            ...
-            "channelNumber": "1",
-            ...
-        },
-        {...},
-        {
-            ...
-            "channelId": "7_45_150_150_1046_30505_1",
-            ...
-            "channelType": "Satellite Digital TV",
-            ...
-            "channelName": "CANAL SUR A.",
-            ...
-            "channelMode": "Satellite",
-            ...
-            "channelNumber": "150",
-            ...
-        },
-        {...}
-    ]
-    "channelLogoServerUrl": "http://...",
-    "cableAnalogSkipped": false,
-    "dataSource": 1,
-    "valueList": "some string"
-    "channelListCount": 317,
-    "deviceSourceIndex": 1
-}
-
+tv_control.get_current_program() # Returns the current channel and the EPG data
+tv_control.set_channel_with_id(channelId) # channelId can be found in channel_list(), get_current_channel() or get_current_program()
 ```
 
 ### Source Controls

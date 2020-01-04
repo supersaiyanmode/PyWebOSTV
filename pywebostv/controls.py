@@ -195,7 +195,11 @@ class TvControl(WebOSControlBase):
             "validation": standard_validation,
             "subscription": True
         },
-        "channel_list": {"uri": "ssap://tv/getChannelList"}
+        "channel_list": {"uri": "ssap://tv/getChannelList"},
+        "get_current_program": {
+            "uri": "ssap://tv/getChannelProgramInfo",
+            "validation": standard_validation
+        }
      }
 
 
