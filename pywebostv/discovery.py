@@ -1,5 +1,8 @@
 import socket
-from future.moves.urllib.parse import urlparse
+try:
+    from urlparse import urlparse
+except ImportError:
+    from urllib.parse import urlparse
 
 import requests
 

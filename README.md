@@ -207,13 +207,14 @@ inp.connect_input()
 inp.move(10, 10)    # Moves mouse
 inp.click()         # Click where the mouse pointer is. It sometimes also acts as the center "OK"
                     # button on the remote.
+inp.ok()
 inp.up()
 inp.down()
 inp.left()
 inp.right()
 inp.home()
 inp.back()
-inp.dash()
+inp.dash()          # The right side menu that appears with Live button
 inp.info()
 inp.num_1()         # Number keys...
 inp.num_2()
@@ -230,21 +231,32 @@ inp.cc()            # Closed captioning
 inp.exit()          
 inp.red()           # Colored buttons
 inp.green()
+inp.yellow()
 inp.blue()
 inp.mute()          # The remaining commands are also available in either MediaControl or TvControl
 inp.volume_up()
 inp.volume_down()
 inp.channel_up()
 inp.channel_down()
+inp.play()
+inp.pause()
+inp.stop()
+inp.fastforward()
+inp.rewind()
+
 inp.disconnect_input()
 ```
 
 ### TV Controls
 
 ```python
-tv_control = TvControl()
+tv_control = TvControl(client)
 tv_control.channel_down()
 tv_control.channel_up()
+tv_control.channel_list()
+tv_control.get_current_channel()
+tv_control.get_current_program() # Returns the current channel and the EPG data
+tv_control.set_channel_with_id(channelId) # channelId can be found in channel_list(), get_current_channel() or get_current_program()
 ```
 
 ### Source Controls

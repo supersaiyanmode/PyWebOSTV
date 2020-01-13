@@ -183,6 +183,23 @@ class TvControl(WebOSControlBase):
     COMMANDS = {
         "channel_down": {"uri": "ssap://tv/channelDown"},
         "channel_up": {"uri": "ssap://tv/channelUp"},
+        "set_channel_with_id": {
+            "uri": "ssap://tv/openChannel",
+            "args": [str],
+            "payload": {
+                "channelId": arguments(0)
+            }
+        },
+        "get_current_channel": {
+            "uri": "ssap://tv/getCurrentChannel",
+            "validation": standard_validation,
+            "subscription": True
+        },
+        "channel_list": {"uri": "ssap://tv/getChannelList"},
+        "get_current_program": {
+            "uri": "ssap://tv/getChannelProgramInfo",
+            "validation": standard_validation
+        }
      }
 
 
@@ -227,7 +244,7 @@ class ApplicationControl(WebOSControlBase):
             "args": [],
             "kwargs": {},
             "payload": {},
-            "validity": lambda p: p.pop("returnValue"),
+            "validation": standard_validation,
             "return": lambda p: p["appId"],
             "subscription": True,
         },
@@ -346,6 +363,9 @@ class InputControl(WebOSControlBase):
         "green": {
             "command": [["type", "button"], ["name", "GREEN"]]
         },
+        "yellow": {
+            "command": [["type", "button"], ["name", "YELLOW"]]
+        },
         "blue": {
             "command": [["type", "button"], ["name", "BLUE"]]
         },
@@ -361,6 +381,21 @@ class InputControl(WebOSControlBase):
         "channel_down": {
             "command": [["type", "button"], ["name", "CHANNELDOWN"]]
         },
+        "play": {
+            "command": [["type", "button"], ["name", "PLAY"]]
+        },
+        "pause": {
+            "command": [["type", "button"], ["name", "PAUSE"]]
+        },
+        "stop": {
+            "command": [["type", "button"], ["name", "STOP"]]
+        },
+        "rewind": {
+            "command": [["type", "button"], ["name", "REWIND"]]
+        },
+        "fastforward": {
+            "command": [["type", "button"], ["name", "FASTFORWARD"]]
+        }
     }
 
     def __init__(self, *args, **kwargs):
