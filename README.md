@@ -151,8 +151,7 @@ system = SystemControl(client)
 system.notify("This is a notification message!")  # Show a notification message on the TV.
 system.power_off()                                # Turns off the TV. There is no way to turn it
                                                   # back on programmically unless you use
-                                                  # something like Wake-on-LAN or something liker
-                                                  # that.
+                                                  # something like Wake-on-LAN.
 system.info()                                     # Returns a dict with keys such as product_name,
                                                   # model_name, # major_ver, minor_ver etc.
 ```
