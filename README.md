@@ -47,6 +47,10 @@ for status in client.register(store):
         print("Please accept the connect on the TV!")
     elif status == WebOSClient.REGISTERED:
         print("Registration successful!")
+
+# Keep the 'store' object because it contains now the access token
+# and use it next time you want to register on the TV.
+print(store)
 ```
 
 ### Using the connection to call APIs
