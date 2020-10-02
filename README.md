@@ -276,6 +276,11 @@ source_control.set_source(sources[0])      # .set_source(..) accepts an InputSou
 
 More controls coming soon!
 
+## Turn on the TV
+
+Turning on the TV is not included in this library because this can be done with a Wake On Lan (WOL) command.
+Use the MAC address of the TV and enable the WOL in the TV settings.
+
 ## Credits
 
 - [klattimer](https://github.com/klattimer/LGWebOSRemote) for his library! Since WebOS team decided
