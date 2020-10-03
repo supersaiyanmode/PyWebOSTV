@@ -278,8 +278,11 @@ More controls coming soon!
 
 ## Turn on the TV
 
-Turning on the TV is not included in this library because this can be done with a Wake On Lan (WOL) command.
-Use the MAC address of the TV and enable the WOL in the TV settings.
+This library helps to establish connection with the TV and control various aspects exposed over the WebSocket API (once it discovers the IP address).
+
+Not depending on other libraries, such as Wake On Lan (WOL) prevents client projects from having to pull in this transitive dependency (which might not be always needed). Further, waking up a sleeping TV requires us sending a magic packet outside of the WebSocket layer that this library tries to limit itself to.
+
+We would highly encourage you to perhaps use the discovered IP address, translate that to the MAC address (there are tons of libraries that do this for you, or check behind the TV on a sticker or check on your router) and then send the magic WOL packet to the TV (again, tons of libraries that do this). The WOL must be enabled on the TV.
 
 ## Credits
 
