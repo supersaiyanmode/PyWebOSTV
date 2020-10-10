@@ -111,14 +111,14 @@ class TestWebOSClient(object):
     def test_new_registration(self):
         client = FakeClient()
         store = {}
-        with raises(Exception, message="Timeout."):
+        with raises(Exception):
             next(client.register(store, timeout=1))
 
         assert 'client-key' not in json.dumps(client.sent_message)
 
         store["client_key"] = "KEY!@#"
 
-        with raises(Exception, message="Timeout."):
+        with raises(Exception):
             next(client.register(store, timeout=1))
 
         assert 'KEY!@#' in json.dumps(client.sent_message)
