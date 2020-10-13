@@ -306,6 +306,9 @@ class InputControl(WebOSControlBase):
         "back": {
             "command": [["type", "button"], ["name", "BACK"]]
         },
+        "menu": {
+            "command": [["type", "button"], ["name", "MENU"]]
+        },
         "ok": {
             "command": [["type", "button"], ["name", "ENTER"]]
         },
