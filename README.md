@@ -237,6 +237,7 @@ inp.red()           # Colored buttons
 inp.green()
 inp.yellow()
 inp.blue()
+inp.menu()          # the menu for adjusting settings for the television 
 inp.mute()          # The remaining commands are also available in either MediaControl or TvControl
 inp.volume_up()
 inp.volume_down()
