@@ -20,3 +20,14 @@ class InputSource(object):
 
     def __repr__(self):
         return "<InputSource '{}'>".format(self["label"])
+
+
+class AudioOutputSource(object):
+    def __init__(self, data):
+        self.data = data
+
+    def __getitem__(self):
+        return self.data
+
+    def __repr__(self):
+        return "<AudioOutputSource '{}'>".format(self.data)
