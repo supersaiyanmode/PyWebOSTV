@@ -176,6 +176,11 @@ class MediaControl(WebOSControlBase):
         "stop": {"uri": "ssap://media.controls/stop"},
         "rewind": {"uri": "ssap://media.controls/rewind"},
         "fast_forward": {"uri": "ssap://media.controls/fastForward"},
+        "set_audio_output": {
+            "uri": "ssap://audio/changeSoundOutput",
+            "args": [str],
+            "payload": {"output": arguments(0)}
+        },
      }
 
 

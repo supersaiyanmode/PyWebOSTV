@@ -132,6 +132,9 @@ media.pause()
 media.stop()
 media.rewind()
 media.fast_forward()
+
+output = ['tv_speaker', 'external_speaker', 'external_optical', 'external_arc']
+media.set_audio_output(output[0])  # Set audio output source to 'tv_speaker'
 ```
 
 #### Subscriptions
