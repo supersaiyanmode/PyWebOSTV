@@ -3,7 +3,7 @@ from queue import Empty
 from uuid import uuid4
 
 from pywebostv.connection import WebOSWebSocketClient
-from pywebostv.model import Application, InputSource
+from pywebostv.model import Application, InputSource, AudioOutputSource
 
 
 ARGS_NONE = ()
@@ -153,6 +153,11 @@ class WebOSControlBase(object):
 
 
 class MediaControl(WebOSControlBase):
+    def list_audio_output_sources(self):
+        sources = ['tv_speaker', 'external_speaker', 'soundbar', 'bt_soundbar', 'tv_external_speaker']
+
+        return [AudioOutputSource(x) for x in sources]
+
     COMMANDS = {
         "volume_up": {"uri": "ssap://audio/volumeUp"},
         "volume_down": {"uri": "ssap://audio/volumeDown"},
@@ -176,11 +181,20 @@ class MediaControl(WebOSControlBase):
         "stop": {"uri": "ssap://media.controls/stop"},
         "rewind": {"uri": "ssap://media.controls/rewind"},
         "fast_forward": {"uri": "ssap://media.controls/fastForward"},
+        "get_audio_output": {
+            "uri": "ssap://audio/getStatus",
+            "validation": standard_validation,
+            "subscription": True,
+        },
         "set_audio_output": {
             "uri": "ssap://audio/changeSoundOutput",
-            "args": [str],
-            "payload": {"output": arguments(0)}
-        },
+            "args": [AudioOutputSource],
+            "kwargs": {},
+            "payload": {
+                "output": arguments(0, postprocess=lambda source: source.data),
+            },
+            "validation": standard_validation,
+        }
      }
 
 
