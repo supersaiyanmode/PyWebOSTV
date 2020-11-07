@@ -182,9 +182,10 @@ class MediaControl(WebOSControlBase):
         "rewind": {"uri": "ssap://media.controls/rewind"},
         "fast_forward": {"uri": "ssap://media.controls/fastForward"},
         "get_audio_output": {
-            "uri": "ssap://audio/getStatus",
+            "uri": "ssap://audio/getSoundOutput",
             "validation": standard_validation,
             "subscription": True,
+            "return": lambda p: AudioOutputSource(p["soundOutput"])
         },
         "set_audio_output": {
             "uri": "ssap://audio/changeSoundOutput",
