@@ -133,9 +133,9 @@ media.stop()
 media.rewind()
 media.fast_forward()
 
-media.get_audio_output()   #returns the currently used audio output source as AudioOutputSource instance
+cur_media_output_source = media.get_audio_output()   # Returns the currently used audio output source as AudioOutputSource instance.
 audio_outputs = media.list_audio_output_sources()    # Returns a list of AudioOutputSource instances.
-media.set_audio_output(audioOutputs[0])             # .set_audio_output(..) accepts an AudioOutputSource instance.
+media.set_audio_output(audio_outputs[0])             # .set_audio_output(..) accepts an AudioOutputSource instance.
 ```
 
 #### Subscriptions
