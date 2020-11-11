@@ -51,7 +51,8 @@ for status in client.register(store):
 # Keep the 'store' object because it contains now the access token
 # and use it next time you want to register on the TV.
 print(store)
-# {'client_key': 'ACCESS_TOKEN_FROM_TV'}
+# Use the client key as below, instead of store = {} This will avoid auth prompt for each time you run the code.
+store = {'client_key': 'ACCESS_TOKEN_FROM_TV'}
 ```
 
 ### Using the connection to call APIs
