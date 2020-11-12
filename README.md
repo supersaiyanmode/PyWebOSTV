@@ -19,9 +19,13 @@ This SDK is a tiny attempt at overcoming some of the above problems.
 ## Current status?
 
 ~~At the moment, I haven't been able to do any kind of extensive testing. No unit test cases too!~~
-Current status: Works for quite a few people! :)
+Current status: Works for quite a few people! :) Also, accepting PRs for bug fixes or if you feel some of the controls could be added or enhanced.
 
-Currently working on more controls~~and unit test cases~~. I will soon upload it to PyPI.
+## Installation
+
+```python
+$ pip install pywebostv
+```
 
 ## How to Use: Connecting to the TV
 
@@ -32,10 +36,14 @@ from pywebostv.discovery import *    # Because I'm lazy, don't do this.
 from pywebostv.connection import *
 from pywebostv.controls import *
 
-# The 'store' gets populated during the registration process. If it is empty, a registration prompt
-# will show up on the TV. You can pass any dictionary-like interface instead -- that when values are
-# set, will persist to a DB, a config file or something similar.
-store = {}
+# 1. For the first run, pass in an empty dictionary object. Empty store leads to an Authentication prompt on TV.
+# 2. Go through the registration process. `store` gets populated in the process.
+# 3. Persist the `store` state to disk.
+# 4. For later runs, read your storage and restore the value of `store`.
+if your_custom_storage_is_empty():
+    store = {}
+else:
+    store = load_from_your_custom_storage()
 
 # Scans the current network to discover TV. Avoid [0] in real code. If you already know the IP,
 # you could skip the slow scan and # instead simply say:
@@ -50,9 +58,12 @@ for status in client.register(store):
 
 # Keep the 'store' object because it contains now the access token
 # and use it next time you want to register on the TV.
-print(store)
-# {'client_key': 'ACCESS_TOKEN_FROM_TV'}
+print(store)   # {'client_key': 'ACCESS_TOKEN_FROM_TV'}
+
+persist_to_your_custom_storage(store)
 ```
+
+**NOTE**: If you're seeing repeated prompts on the TV to re-authenticate, there's a good chance you're not using the `store` correctly. Read the FAQs section for more.
 
 ### Using the connection to call APIs
 
@@ -279,15 +290,20 @@ source_control.set_source(sources[0])      # .set_source(..) accepts an InputSou
 # app.
 ```
 
-More controls coming soon!
 
-## Turn on the TV
+## FAQs
 
-This library helps to establish connection with the TV and control various aspects exposed over the WebSocket API (once it discovers the IP address).
+1. **How do I turn on the TV?**
 
-Not depending on other libraries, such as Wake On Lan (WOL) prevents client projects from having to pull in this transitive dependency (which might not be always needed). Further, waking up a sleeping TV requires us sending a magic packet outside of the WebSocket layer that this library tries to limit itself to.
+This library helps to establish connection with the TV and control various aspects exposed over the WebSocket API (once it discovers the IP address). If the TV is off, there's no active connection and obviously, this library can't do much. However, the TV still supports WakeOnLAN (WOL). This involves getting the MAC address of the TV and sending a magic packet to it. We would highly encourage you to perhaps use the discovered IP address, translate that to the MAC address (there are tons of libraries that do this for you, or look for it in your TV settings or get it from your router) and then send the magic WOL packet to the TV (again, tons of libraries that do this). The WOL must be enabled on the TV. As far as including the feature in this library goes -- not depending on other libraries, such as WOL, prevents client projects from having to pull in this transitive dependency which might not be always needed. Further, waking up a sleeping TV requires us sending a magic packet outside of the WebSocket layer that this library tries to limit itself to.
 
-We would highly encourage you to perhaps use the discovered IP address, translate that to the MAC address (there are tons of libraries that do this for you, or check behind the TV on a sticker or check on your router) and then send the magic WOL packet to the TV (again, tons of libraries that do this). The WOL must be enabled on the TV.
+2. **Why am I getting repeated prompts to turn on the TV?**
+
+There's a good chance you're using the `store` incorrectly. The very first time, you run with an unregistered TV, the `store` you pass in would be empty. Once the registration is successful, remember to persist the `store` object to database, config file or any other storage. The next time you your program connects to the TV, you should restore the state of `store` from your storage. If you don't do this, and pass in an empty object for the second time, you're bound to get the prompt to re-authenticate. In other words, if `store` is empty, you get the prompt. If you successfully restore the value from the last registration, you won't.
+
+A tiny side note: What `client.register(..)` expects is an object with `__getitem__(..)` and `__setitem__(..)`. So, you could potentially pass an object that persists the key+value pair on `__setitem__(..)` and reads values from your storage in `__getitem__(..)`.
+
+
 
 ## Credits
 
