@@ -27,6 +27,9 @@ Current status: Works for quite a few people! :) Also, accepting PRs for bug fix
 $ pip install pywebostv
 ```
 
+## Documentation
+https://docs.contour.so/supersaiyanmode/PyWebOSTV/getting-started
+
 ## How to Use: Connecting to the TV
 
 ### Establishing the connection.
