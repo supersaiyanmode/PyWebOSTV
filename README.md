@@ -27,6 +27,15 @@ Current status: Works for quite a few people! :) Also, accepting PRs for bug fix
 $ pip install pywebostv
 ```
 
+### macOS Big Sur
+
+```python
+$ brew install openssl
+$ env LDFLAGS="-L$(brew --prefix openssl)/lib" CFLAGS="-I$(brew --prefix openssl)/include" pip3 install cryptography
+$ pip3 install pywebostv
+```
+Note: You'll need [Homebrew](https://brew.sh) installed.
+
 ## How to Use: Connecting to the TV
 
 ### Establishing the connection.
