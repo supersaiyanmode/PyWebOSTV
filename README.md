@@ -29,12 +29,14 @@ $ pip install pywebostv
 
 ### macOS Big Sur
 
+If you see errors such as opensslv.h file not found, it most likely indicates that you don't have a working installation of OpenSSL. In such a case, we would recommend that you install it using the following steps (assuming you've brew as your package manager):
+
 ```python
 $ brew install openssl
 $ env LDFLAGS="-L$(brew --prefix openssl)/lib" CFLAGS="-I$(brew --prefix openssl)/include" pip3 install cryptography
 $ pip3 install pywebostv
 ```
-Note: You'll need [Homebrew](https://brew.sh) installed.
+
 
 ## How to Use: Connecting to the TV
 
