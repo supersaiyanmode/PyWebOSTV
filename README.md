@@ -9,7 +9,7 @@ I looked at a few libraries. The LGWebOSRemote repository by
 [klattimer](https://github.com/klattimer/LGWebOSRemote) is definitely a good library, but it has a
 few problems:
 
-- Meant to be used with Python 2.x.
+- Meant to be used with Python 2.x or Python 3.X
 - Assumes all the users of the library would like to save the credentials to ~/.lgtv.json.
 - Assumes only a single command will be fired and waited on at any given time (ctrl+F for `self.__waiting_callback`)
 - Mouse/Keyboard not supported.
