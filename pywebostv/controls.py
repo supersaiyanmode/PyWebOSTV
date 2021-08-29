@@ -1,4 +1,4 @@
-from collections import Callable
+from typing import Callable
 from queue import Empty
 from uuid import uuid4
 
