@@ -1,4 +1,10 @@
-from typing import Callable
+try:
+    # begin try for python <= 3.5
+    from collections import Callable
+except ImportError:
+    # after try for python >= 3.10
+    from typing import Callable
+
 from queue import Empty
 from uuid import uuid4
 
