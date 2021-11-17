@@ -232,6 +232,14 @@ class TvControl(WebOSControlBase):
 class SystemControl(WebOSControlBase):
     COMMANDS = {
         "power_off": {"uri": "ssap://system/turnOff"},
+        "screen_off": {
+            "uri": "ssap://com.webos.service.tvpower/power/turnOffScreen",
+            "payload": {"standbyMode": "active"}
+        },
+        "screen_on": {
+            "uri": "ssap://com.webos.service.tvpower/power/turnOnScreen",
+            "payload": {"standbyMode": "active"}
+        },
         "info": {
             "uri": "ssap://com.webos.service.update/getCurrentSWInformation",
             "validation": standard_validation,
