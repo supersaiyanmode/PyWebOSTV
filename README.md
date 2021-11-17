@@ -185,6 +185,8 @@ system.power_off()                                # Turns off the TV. There is n
                                                   # something like Wake-on-LAN.
 system.info()                                     # Returns a dict with keys such as product_name,
                                                   # model_name, # major_ver, minor_ver etc.
+system.screen_off()                               # Energy Saving: Turns off the screen.
+system.screen_on()                                # Energy Saving: Turns the screen back on.
 ```
 
 ### Application Controls
