@@ -109,6 +109,8 @@ class WebOSControlBase(object):
             if callback:
                 def callback_wrapper(res):
                     payload = res.get("payload")
+                    if res.get("type", None) == "error":
+                        callback(False, res.get("type", "Unknown Communication Error"))
                     status, message = response_valid(payload)
                     if not status:
                         return callback(False, message)
@@ -119,6 +121,8 @@ class WebOSControlBase(object):
             elif block:
                 res = self.request(cmd_info["uri"], params, block=block,
                                    timeout=timeout)
+                if res.get("type", None) == "error":
+                    raise IOError(res.get("error", "Unknown Communication Error"))
                 payload = res.get("payload")
                 status, message = response_valid(payload)
                 if not status:
