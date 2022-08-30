@@ -51,11 +51,9 @@ from pywebostv.controls import *
 # 2. Go through the registration process. `store` gets populated in the process.
 # 3. Persist the `store` state to disk.
 # 4. For later runs, read your storage and restore the value of `store`.
-if your_custom_storage_is_empty():
-    store = {}
-else:
-    store = load_from_your_custom_storage()
-
+    store = {} #if you dont have {'client_key': 'ACCESS_TOKEN_FROM_TV'} just run script then code will printed
+    #if you have {'client_key': 'ACCESS_TOKEN_FROM_TV'} use like this
+    # store = {'client_key': 'ACCESS_TOKEN_FROM_TV'}
 # Scans the current network to discover TV. Avoid [0] in real code. If you already know the IP,
 # you could skip the slow scan and # instead simply say:
 #    client = WebOSClient("<IP Address of TV>")
@@ -69,9 +67,7 @@ for status in client.register(store):
 
 # Keep the 'store' object because it contains now the access token
 # and use it next time you want to register on the TV.
-print(store)   # {'client_key': 'ACCESS_TOKEN_FROM_TV'}
-
-persist_to_your_custom_storage(store)
+print(store)   #That will print {'client_key': 'ACCESS_TOKEN_FROM_TV'}
 ```
 
 **NOTE**: If you're seeing repeated prompts on the TV to re-authenticate, there's a good chance you're not using the `store` correctly. Read the FAQs section for more.
@@ -180,9 +176,35 @@ media.subscribe_get_volume(on_volume_change)  # on_volume_change(..) will now be
 ```python
 system = SystemControl(client)
 system.notify("This is a notification message!")  # Show a notification message on the TV.
-system.power_off()                                # Turns off the TV. There is no way to turn it
+system.power_off()                                # Turns off the TV.
                                                   # back on programmically unless you use
-                                                  # something like Wake-on-LAN.
+                                                  # $ pip install wakeonlan
+from wakeonlan import send_magic_packet           # EDIT: You can use WakeOnLan like this.
+send_magic_packet("YOUR_TV_MAC_ADRESS")           # For Turn on Tv. 
+                                                  # But TV must have internet connection.
+                                                  # if TV Turn off, other controls will not working
+
+def open_closeTV(command_num)
+    if command_num == 0:
+        send_magic_packet("YOUT_TV_MAC_ADRESS")   # That will turn on TV and you can use
+    else:                                         # other commands like that
+        store = {'client_key': 'ACCESS_TOKEN_FROM_TV'}
+        client = WebOSClient("192.168.0.122")
+        try:                                      # you can use try command like this
+            client.connect()
+            for status in client.register(store):
+                if status == WebOSClient.PROMPTED:
+                   print("Please accept the connect on the TV!")
+                elif status == WebOSClient.REGISTERED:
+                   print("Registration successful!")
+                   # YOUR COMMANDS
+                   if command_num == 1:
+                      system.power_off()
+        except Exception as e:
+            print(e)
+open_closeTV(0) #That will turn on TV when you close tv with remote or this script
+open_closeTV(1) #That will turn off TV
+ 
 system.info()                                     # Returns a dict with keys such as product_name,
                                                   # model_name, # major_ver, minor_ver etc.
 system.screen_off()                               # Energy Saving: Turns off the screen.
