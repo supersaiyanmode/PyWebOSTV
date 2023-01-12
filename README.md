@@ -325,4 +325,6 @@ A tiny side note: What `client.register(..)` expects is an object with `__getite
    implementation
 - As far as input controls are concerned, they are based on the Java package written by
    [Connect-SDK folks](https://github.com/ConnectSDK/Connect-SDK-Android-Core/tree/master/src/com/connectsdk/service/webos)!
+- Bendavid for the inspiration for the lunahack addon https://github.com/bendavid/aiopylgtv
 - All individual contributors to this repository.
+
