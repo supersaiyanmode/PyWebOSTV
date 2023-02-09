@@ -61,7 +61,7 @@ def get_icon_data(url: str):
         with open(url, 'rb') as f:
             content = f.read()
     else:
-        content = requests.get(url).content
+        content = requests.get(url, timeout=17).content
     data = base64.b64encode(content).decode('utf-8')
     return data
 
