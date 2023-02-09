@@ -179,7 +179,8 @@ media.subscribe_get_volume(on_volume_change)  # on_volume_change(..) will now be
 
 ```python
 system = SystemControl(client)
-system.notify("This is a notification message!")  # Show a notification message on the TV.
+system.notify("This is a notification message!",  # Show a notification message on the TV. 
+              "/path/or/url/to/icon.png")         # optional URL or path to 80x80 png icon to display.
 system.power_off()                                # Turns off the TV. There is no way to turn it
                                                   # back on programmically unless you use
                                                   # something like Wake-on-LAN.

@@ -2,6 +2,7 @@ from threading import Event, Semaphore
 
 from pytest import raises, mark
 
+import pywebostv.controls
 from pywebostv.controls import WebOSControlBase
 from pywebostv.controls import arguments, process_payload
 from pywebostv.controls import MediaControl, SystemControl, ApplicationControl
@@ -324,11 +325,31 @@ class TestSystemControl(object):
         system = SystemControl(client)
         system.notify("test", block=False)
 
-        client.assert_sent_message_without_id({
-            "type": "request",
-            "uri": "ssap://system.notifications/createToast",
-            "payload": {"message": "test"}
-        })
+        client.assert_sent_message_without_id(
+            {
+                "type": "request",
+                "uri": "ssap://system.notifications/createToast",
+                "payload": {"message": "test", "iconData": None, "iconExtension": "png"},
+            }
+        )
+
+    def test_notify__icon(self):
+        def mock_get_icon_data(*args, **kwargs):
+            return "dummy.png"
+
+        pywebostv.controls.get_icon_data = mock_get_icon_data
+
+        client = FakeClient()
+        system = SystemControl(client)
+        system.notify("test", "myicon.png", block=False)
+
+        client.assert_sent_message_without_id(
+            {
+                "type": "request",
+                "uri": "ssap://system.notifications/createToast",
+                "payload": {"message": "test", "iconData": "dummy.png", "iconExtension": "png",},
+            }
+        )
 
 
 class TestApplicationControl(object):
