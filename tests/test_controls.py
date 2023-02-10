@@ -1,3 +1,4 @@
+import base64
 from threading import Event, Semaphore
 
 from pytest import raises, mark
@@ -334,20 +335,18 @@ class TestSystemControl(object):
         )
 
     def test_notify_icon(self):
-        def mock_get_icon_data(*args, **kwargs):
-            return "dummy.png"
-
-        pywebostv.controls.get_icon_data = mock_get_icon_data
-
         client = FakeClient()
         system = SystemControl(client)
-        system.notify("test", icon_bytes="mydata", icon_ext="png", block=False)
+        bytes = str.encode("mydata")
+        system.notify("test", icon_bytes=bytes, icon_ext="png", block=False)
 
         client.assert_sent_message_without_id(
             {
                 "type": "request",
                 "uri": "ssap://system.notifications/createToast",
-                "payload": {"message": "test", "iconData": "mydata", "iconExtension": "png"}
+                "payload": {"message": "test",
+                            "iconData": base64.b64encode(bytes).decode('utf-8'),
+                            "iconExtension": "png"}
             }
         )
 

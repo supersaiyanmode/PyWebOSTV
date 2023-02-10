@@ -1,3 +1,5 @@
+import base64
+
 try:
     # begin try for python <= 3.5
     from collections import Callable
@@ -252,7 +254,9 @@ class SystemControl(WebOSControlBase):
             "args": [str],
             "payload": {
                 "message": arguments(0),
-                "iconData": arguments("icon_bytes", default=None) ,
+                "iconData": arguments("icon_bytes",
+                                      postprocess=lambda bytes: base64.b64encode(bytes).decode('utf-8'),
+                                      default=None),
                 "iconExtension": arguments("icon_ext", default=None),
             },
         },
