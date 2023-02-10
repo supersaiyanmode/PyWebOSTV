@@ -329,11 +329,11 @@ class TestSystemControl(object):
             {
                 "type": "request",
                 "uri": "ssap://system.notifications/createToast",
-                "payload": {"message": "test", "iconData": None, "iconExtension": "png"},
+                "payload": {"message": "test", "iconData": None, "iconExtension": None}
             }
         )
 
-    def test_notify__icon(self):
+    def test_notify_icon(self):
         def mock_get_icon_data(*args, **kwargs):
             return "dummy.png"
 
@@ -341,13 +341,13 @@ class TestSystemControl(object):
 
         client = FakeClient()
         system = SystemControl(client)
-        system.notify("test", "myicon.png", block=False)
+        system.notify("test", icon_bytes="mydata", icon_ext="png", block=False)
 
         client.assert_sent_message_without_id(
             {
                 "type": "request",
                 "uri": "ssap://system.notifications/createToast",
-                "payload": {"message": "test", "iconData": "dummy.png", "iconExtension": "png",},
+                "payload": {"message": "test", "iconData": "mydata", "iconExtension": "png"}
             }
         )
 

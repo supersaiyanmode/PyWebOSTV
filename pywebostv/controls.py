@@ -5,15 +5,11 @@ except ImportError:
     # after try for python >= 3.10
     from typing import Callable
 
-import base64
-import os
 from queue import Empty
 from uuid import uuid4
 
-import requests
-
 from pywebostv.connection import WebOSWebSocketClient
-from pywebostv.model import Application, AudioOutputSource, InputSource
+from pywebostv.model import Application, InputSource, AudioOutputSource
 
 ARGS_NONE = ()
 
@@ -53,17 +49,6 @@ def standard_validation(payload):
     if not payload.pop("returnValue", None):
         return False, payload.pop("errorText", "Unknown error.")
     return True, None
-
-
-def get_icon_data(url: str):
-    """Return base64 encoded image data retrieved from url."""
-    if os.path.exists(url):
-        with open(url, 'rb') as f:
-            content = f.read()
-    else:
-        content = requests.get(url, timeout=17).content
-    data = base64.b64encode(content).decode('utf-8')
-    return data
 
 
 class WebOSControlBase(object):
@@ -266,9 +251,9 @@ class SystemControl(WebOSControlBase):
             "uri": "ssap://system.notifications/createToast",
             "args": [str],
             "payload": {
-                "iconData": arguments(1, postprocess=lambda url: get_icon_data(url), default=None) ,
-                "iconExtension": "png",
                 "message": arguments(0),
+                "iconData": arguments("icon_bytes", default=None) ,
+                "iconExtension": arguments("icon_ext", default=None),
             },
         },
     }
