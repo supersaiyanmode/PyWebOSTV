@@ -1,3 +1,5 @@
+import base64
+
 try:
     # begin try for python <= 3.5
     from collections import Callable
@@ -10,7 +12,6 @@ from uuid import uuid4
 
 from pywebostv.connection import WebOSWebSocketClient
 from pywebostv.model import Application, InputSource, AudioOutputSource
-
 
 ARGS_NONE = ()
 
@@ -251,8 +252,14 @@ class SystemControl(WebOSControlBase):
         "notify": {
             "uri": "ssap://system.notifications/createToast",
             "args": [str],
-            "payload": {"message": arguments(0)}
-        }
+            "payload": {
+                "message": arguments(0),
+                "iconData": arguments("icon_bytes",
+                                      postprocess=lambda bytes: base64.b64encode(bytes).decode('utf-8'),
+                                      default=None),
+                "iconExtension": arguments("icon_ext", default=None),
+            },
+        },
     }
 
 
