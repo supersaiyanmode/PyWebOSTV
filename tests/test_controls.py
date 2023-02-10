@@ -337,15 +337,15 @@ class TestSystemControl(object):
     def test_notify_icon(self):
         client = FakeClient()
         system = SystemControl(client)
-        bytes = str.encode("mydata")
-        system.notify("test", icon_bytes=bytes, icon_ext="png", block=False)
+        data = str.encode("mydata")
+        system.notify("test", icon_bytes=data, icon_ext="png", block=False)
 
         client.assert_sent_message_without_id(
             {
                 "type": "request",
                 "uri": "ssap://system.notifications/createToast",
                 "payload": {"message": "test",
-                            "iconData": base64.b64encode(bytes).decode('utf-8'),
+                            "iconData": base64.b64encode(data).decode('utf-8'),
                             "iconExtension": "png"}
             }
         )
