@@ -136,8 +136,12 @@ class WebOSClient(WebOSWebSocketClient):
     PROMPTED = 1
     REGISTERED = 2
 
-    def __init__(self, host):
-        ws_url = "ws://{}:3000/".format(host)
+    def __init__(self, host, secure=False):
+        if secure:
+            ws_url = "wss://{}:3001/".format(host)
+        else:
+            ws_url = "ws://{}:3000/".format(host)
+
         super(WebOSClient, self).__init__(ws_url)
         self.waiters = {}
         self.waiter_lock = RLock()
@@ -146,10 +150,10 @@ class WebOSClient(WebOSWebSocketClient):
         self.send_lock = RLock()
 
     @staticmethod
-    def discover():
+    def discover(secure=False):
         res = discover("urn:schemas-upnp-org:device:MediaRenderer:1",
                        keyword="LG", hosts=True, retries=3)
-        return [WebOSClient(x) for x in res]
+        return [WebOSClient(x, secure) for x in res]
 
     def register(self, store, timeout=60):
         if "client_key" in store:
