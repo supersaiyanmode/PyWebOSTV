@@ -138,9 +138,9 @@ class WebOSClient(WebOSWebSocketClient):
 
     def __init__(self, host, secure=False):
         if secure:
-            ws_url = "wss://{}:3001/".format(host)
+            ws_url = f"wss://{host}:3001/"
         else:
-            ws_url = "ws://{}:3000/".format(host)
+            ws_url = f"ws://{host}:3000/"
 
         super(WebOSClient, self).__init__(ws_url)
         self.waiters = {}
