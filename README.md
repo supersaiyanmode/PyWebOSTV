@@ -59,7 +59,9 @@ else:
 # Scans the current network to discover TV. Avoid [0] in real code. If you already know the IP,
 # you could skip the slow scan and # instead simply say:
 #    client = WebOSClient("<IP Address of TV>")
-client = WebOSClient.discover()[0]
+# or for newer models:
+#    client = WebOSClient("<IP Address of TV>", secure=True)
+client = WebOSClient.discover()[0] # Use discover(secure=True) for newer models.
 client.connect()
 for status in client.register(store):
     if status == WebOSClient.PROMPTED:
@@ -319,7 +321,9 @@ There's a good chance you're using the `store` incorrectly. The very first time,
 
 A tiny side note: What `client.register(..)` expects is an object with `__getitem__(..)` and `__setitem__(..)`. So, you could potentially pass an object that persists the key+value pair on `__setitem__(..)` and reads values from your storage in `__getitem__(..)`.
 
+3. **Why am I getting `Connection reset by peer` errors after updating my TV?**
 
+Newer TV models with current firmware require the use of secure WebSockets. Use the `secure=True` flag with `discover(..)` or `WebOSClient(..)`.
 
 ## Credits
 
