@@ -140,7 +140,10 @@ class WebOSControlBase(object):
 
     def subscribe(self, name, cmd_info):
         def request_func(callback):
-            response_valid = cmd_info.get("validation", lambda p: (True, None))
+            response_valid = cmd_info.get(
+                "subscription_validation",
+                cmd_info.get("validation", lambda p: (True, None))
+            )
             return_fn = cmd_info.get('return', lambda x: x)
 
             def callback_wrapper(payload):
@@ -198,7 +201,8 @@ class MediaControl(WebOSControlBase):
         "fast_forward": {"uri": "ssap://media.controls/fastForward"},
         "get_audio_output": {
             "uri": "ssap://audio/getSoundOutput",
-            "validation": subscription_validation,
+            "validation": standard_validation,
+            "subscription_validation": subscription_validation,
             "subscription": True,
             "return": lambda p: AudioOutputSource(p["soundOutput"])
         },
