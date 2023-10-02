@@ -47,10 +47,14 @@ def process_payload(obj, *args, **kwargs):
         return obj
 
 
-def standard_validation(payload):
-    if not payload.pop("returnValue", None):
+def standard_validation(payload, key="returnValue"):
+    if not payload.pop(key, None):
         return False, payload.pop("errorText", "Unknown error.")
     return True, None
+
+
+def subscription_validation(payload):
+    return standard_validation(payload, "subscribed")
 
 
 class WebOSControlBase(object):
@@ -194,7 +198,7 @@ class MediaControl(WebOSControlBase):
         "fast_forward": {"uri": "ssap://media.controls/fastForward"},
         "get_audio_output": {
             "uri": "ssap://audio/getSoundOutput",
-            "validation": standard_validation,
+            "validation": subscription_validation,
             "subscription": True,
             "return": lambda p: AudioOutputSource(p["soundOutput"])
         },

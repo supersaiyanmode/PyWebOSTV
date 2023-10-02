@@ -177,6 +177,20 @@ media.subscribe_get_volume(on_volume_change)  # on_volume_change(..) will now be
                                               # volume/mute status etc changes.
 ```
 
+`get_audio_output` also supports subscription. To subscribe to audio output changes you may use something like:
+
+```python
+def on_audio_output_change(status, payload):
+    if status:
+        print(payload)
+    else:
+        print("Something went wrong.")
+
+media.subscribe_get_audio_output(on_audio_output_change)  # on_audio_output_change(..) will now be called when the
+                                                          # output changes, for example connecting/disconneting a
+                                                          # bluetooth headphone device.
+```
+
 ### System Controls
 
 ```python
