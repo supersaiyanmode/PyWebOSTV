@@ -232,6 +232,7 @@ class TvControl(WebOSControlBase):
         "get_current_channel": {
             "uri": "ssap://tv/getCurrentChannel",
             "validation": standard_validation,
+            "subscription_validation": subscription_validation,
             "subscription": True
         },
         "channel_list": {"uri": "ssap://tv/getChannelList"},
