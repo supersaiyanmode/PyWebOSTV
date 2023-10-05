@@ -54,7 +54,11 @@ def standard_validation(payload, key="returnValue"):
 
 
 def subscription_validation(payload):
-    return standard_validation(payload, "subscribed")
+    for key in {"subscribed", "returnValue"}:
+        status, error_text = standard_validation(payload, key)
+        if status:
+            break
+    return status, error_text
 
 
 class WebOSControlBase(object):
@@ -140,10 +144,7 @@ class WebOSControlBase(object):
 
     def subscribe(self, name, cmd_info):
         def request_func(callback):
-            response_valid = cmd_info.get(
-                "subscription_validation",
-                cmd_info.get("validation", lambda p: (True, None))
-            )
+            response_valid = cmd_info.get("subscription_validation", lambda p: (True, None))
             return_fn = cmd_info.get('return', lambda x: x)
 
             def callback_wrapper(payload):
@@ -182,6 +183,7 @@ class MediaControl(WebOSControlBase):
         "get_volume": {
             "uri": "ssap://audio/getVolume",
             "validation": standard_validation,
+            "subscription_validation": subscription_validation,
             "subscription": True,
         },
         "set_volume": {
@@ -299,6 +301,7 @@ class ApplicationControl(WebOSControlBase):
             "kwargs": {},
             "payload": {},
             "validation": standard_validation,
+            "subscription_validation": subscription_validation,
             "return": lambda p: p["appId"],
             "subscription": True,
         },

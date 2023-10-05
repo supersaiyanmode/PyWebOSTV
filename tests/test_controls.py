@@ -170,7 +170,7 @@ class TestWebOSControlBase(object):
             "test": {
                 "uri": "/test",
                 "subscription": True,
-                "validation": lambda p: (p == {"a": 1}, "Error.")
+                "subscription_validation": lambda p: (p == {"a": 1}, "Error.")
             },
         }
 
