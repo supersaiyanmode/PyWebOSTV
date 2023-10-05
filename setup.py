@@ -6,7 +6,7 @@ except ImportError:
 
 setup(
     name='pywebostv',
-    version='0.8.9',
+    version='0.8.10',
     url='https://github.com/supersaiyanmode/PyWebOSTV',
     author='Srivatsan Iyer',
     author_email='supersaiyanmode.rox@gmail.com',
