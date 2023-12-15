@@ -211,6 +211,8 @@ system.screen_on()                                # Energy Saving: Turns the scr
 ### Application Controls
 
 ```python
+youTubeVideoId = "dQw4w9WgXcQ"
+
 app = ApplicationControl(client)
 apps = app.list_apps()                            # Returns a list of `Application` instances.
 
@@ -220,7 +222,7 @@ yt = [x for x in apps if "youtube" in x["title"].lower()][0]
                                                   # be this lazy. Check for errors). Also, Try
                                                   # searching similarly for "amazon", "netflix" etc.
 launch_info = app.launch(yt)                      # Launches YouTube and shows the main page.
-launch_info = app.launch(yt, content_id="dQw4w9WgXcQ")
+launch_info = app.launch(yt, content_id = "v=" + youTubeVideoId)
                                                   # Or you could even launch a video directly!
 app.close(launch_info)                            # Close what we just launched.
 
